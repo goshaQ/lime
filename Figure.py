@@ -9,8 +9,9 @@ class Figure(object):
             size: A string representing the size of the figure - small/medium/big
     """
 
-    def __init__(self, x, y, orientation, color,
+    def __init__(self, id, x, y, orientation, color,
         shape, size):
+        self.id = id
         self.x = x
         self.y = y
         self.orientation = orientation
