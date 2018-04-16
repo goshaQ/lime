@@ -33,3 +33,21 @@ class Engine:
     """
     def get_count(self):
         return self.count
+
+
+    def get_by_size(self, size):
+        pass
+
+    def get_by_color(self, color):
+        pass
+    
+    def get_by_shape(self, shape):
+        pass
+
+    """
+        Attributes:
+            side: A string with side (right, left, top, bottom)
+            figure: A figure object
+    """
+    def get_by_side(self, side, figure):
+        pass
