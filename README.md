@@ -13,6 +13,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Graph Engine
 - [Rtree 0.8.3](https://pypi.org/project/Rtree/)
+- [libspatialindex](http://libspatialindex.github.io/index.html)
 ### Filesystem
 
 ## Authors
