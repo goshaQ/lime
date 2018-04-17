@@ -18,4 +18,4 @@ class Figure(object):
         self.color = color
         self.shape = shape
         self.size = size
-        self.name = color + " " + shape
+        self.name = str(id) + " " + size + " " + color + " " + shape
