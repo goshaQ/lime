@@ -16,6 +16,10 @@ These instructions will get you a copy of the project up and running on your loc
 - [libspatialindex](http://libspatialindex.github.io/index.html)
 ### Filesystem
 
+### Query parser
+- [Moz SQL Parser](https://github.com/mozilla/moz-sql-parser)
+- [pyparsing](http://pyparsing.wikispaces.com/)
+
 ## Authors
 - Gosha Emelyanov - [goshaQ](https://github.com/goshaQ)
 - Bulat Maksudov - [Luab](https://github.com/Luab) 
