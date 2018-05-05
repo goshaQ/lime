@@ -1,12 +1,12 @@
 class Node:
     """
-        Representation of a single node.
-        
-        Attributes:
-            _id (int): A record's id.
-            _label (Label): Label of a node.
-            _next_rel (Relationship): The first relationship connected to a node.
-            _next_prop (Property): The first property associated with a node.
+    Representation of a single node.
+    
+    Attributes:
+        _id (int): A record's id.
+        _label (Label): Label of a node.
+        _next_rel (Relationship): The first relationship connected to a node.
+        _next_prop (Property): The first property associated with a node.
     """
 
     def __init__(self, id, label, next_prop=None, next_rel=None):

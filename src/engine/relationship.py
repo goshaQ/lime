@@ -1,18 +1,18 @@
 class Relationship:
     """
-        Representation of a relationship that connects two nodes.
-        
-        Attributes:
-            _id (int): A relationships' id.
-            _is_directed (bool): Tells whether a relationship is directed or not.
-            _first_node (Node): ID of the node at the start of a relationship.
-            _second_node (Node): ID of the node at the end of a relationship.
-            _label (Label): Label of a relationship.
-            _next_prop (Property): The first property associated with a relationship.
-            _first_prev_rel (Relationship): The next relationship of the start node.
-            _first_next_rel (Relationship): The previous relationship of the start node.
-            _second_prev_rel (Relationship): The next relationship of the end node.
-            _second_next_rel (Relationship): The previous relationship of the end node.
+    Representation of a relationship that connects two nodes.
+    
+    Attributes:
+        _id (int): A relationships' id.
+        _is_directed (bool): Tells whether a relationship is directed or not.
+        _first_node (Node): ID of the node at the start of a relationship.
+        _second_node (Node): ID of the node at the end of a relationship.
+        _label (Label): Label of a relationship.
+        _next_prop (Property): The first property associated with a relationship.
+        _first_prev_rel (Relationship): The next relationship of the start node.
+        _first_next_rel (Relationship): The previous relationship of the start node.
+        _second_prev_rel (Relationship): The next relationship of the end node.
+        _second_next_rel (Relationship): The previous relationship of the end node.
     """
 
     def __init__(self, id, is_directed, first_node, second_node, label, next_prop,

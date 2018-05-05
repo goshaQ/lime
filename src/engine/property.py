@@ -1,13 +1,13 @@
 class Property:
     """
-        Representation of a property associated with a node or relationship.
-        
-        Attributes:
-            _id (int): A property's id.
-            _type (PropertyType): The type of a property.
-            _label (Label): Label of a property.
-            _value (any?): The value of a property.
-            _next_prop (Property): The next property associated with a node or relationship.
+    Representation of a property associated with a node or relationship.
+    
+    Attributes:
+        _id (int): A property's id.
+        _type (PropertyType): The type of a property.
+        _label (Label): Label of a property.
+        _value (any?): The value of a property.
+        _next_prop (Property): The next property associated with a node or relationship.
     """
 
     def __init__(self, id, type, label, value, next_prop):

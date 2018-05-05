@@ -1,10 +1,10 @@
 class Label:
     """
-        Representation of a label characterizing a node or property.
-        
-        Attributes:
-            _id (int): A label's id.
-            _value (str): The value of a label.
+    Representation of a label characterizing a node or property.
+    
+    Attributes:
+        _id (int): A label's id.
+        _value (str): The value of a label.
     """
 
     def __init__(self, id, value):
