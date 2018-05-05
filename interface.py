@@ -6,6 +6,10 @@ class Interface():
     def __init__(self):
         self._executor = Executor()
 
+    def add_index(self):
+        query = input("Enter query for index: ")
+        self._executor.execute_indexing(query)
+
     def add_figures(self, data):
         queries = []
         for d in data:

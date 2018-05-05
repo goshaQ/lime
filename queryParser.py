@@ -18,7 +18,7 @@ class Parser():
         tokens = query.split(" ")
         if "create" == tokens[0]:
             if "index" == tokens[1]:
-                return self._create_index(query)
+                return self._create_index(tokens, query)
             else:
                 return self._create_clause(tokens, query)
         elif "match" == tokens[0]:
@@ -26,9 +26,17 @@ class Parser():
         else:
             print("Only 'CREATE' and 'MATCH' clauses are available")
 
-    def _create_index(self, query):
-        # TODO: implement
-        pass
+    def _create_index(self, tokens, query):
+        """
+        'CREATE INDEX (ind:Index {<property>}) RETURN ind'
+        """
+        label = tokens[2].split(':', 1)[1]
+        properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
+        values = []
+        for p in properties:
+            values.append(p.split(':', 1)[1])
+        return label, values
+            
     
     def _create_clause(self, tokens, query):
         self._check_create(query)
@@ -89,7 +97,8 @@ class Parser():
         pass
 
 
-# parser = Parser()
+parser = Parser()
 # query = "MATCH (node1:Figure {x: 9, y:10})-[:LEFT]->(node2:Figure) RETURN node2"
 # query = "MATCH (node:Figure {x: 9, y: 10}) RETURN node"
-# parser.parse(query)
+query = "CREATE INDEX (ind:Index {x: 10, y:10}) RETURN ind"
+parser.parse(query)
