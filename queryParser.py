@@ -3,9 +3,9 @@
 """
 
 class Parser():
+
     def __init__(self):
         pass
-
 
     def parse(self, query):
         """
@@ -17,14 +17,21 @@ class Parser():
         query = query.lower()
         tokens = query.split(" ")
         if "create" == tokens[0]:
-            return self._create_clause(tokens, query)
+            if "index" == tokens[1]:
+                return self._create_index(query)
+            else:
+                return self._create_clause(tokens, query)
         elif "match" == tokens[0]:
-            pass
+            return self._match_query(query)
         else:
             print("Only 'CREATE' and 'MATCH' clauses are available")
+
+    def _create_index(self, query):
+        # TODO: implement
+        pass
     
     def _create_clause(self, tokens, query):
-        self._check_create(tokens, query)
+        self._check_create(query)
         label = tokens[1].replace('(', '').split(':', 1)[1]
         properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',', 1)
         node_data = []
@@ -33,23 +40,32 @@ class Parser():
         return label, node_data
         
 
-    def _check_create(self, tokens, query):
+    def _check_create(self, query):
         # TODO: implement checking correctness of the query
         pass
 
-    def _match_query(self, tokens, query):
-        self._check_match(tokens, query)
+    def _match_query(self, query):
+        self._check_match(query)
+        return self._match_by_properties(query)
 
+    def _match_by_properties(self, query):
+        properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
+        props = []
+        values = []
+        for p in properties:
+            temp = p.split(':', 1)
+            props.append(temp[0])
+            values.append(temp[1])
+        return [props, values]
 
-    def _check_match(self, tokens, query):
+    def _get_property_and_value(self, condition):
+        prop = condition.split('.', 1)[1].split('=',1)[0]
+        value = condition.split('=', 1)[1]
+        return prop, value
+
+    def _check_match(self, query):
         # TODO: implement checking correctness ofthe query
         pass
-
-parser = Parser()
-query1 = "MATCH (node:Figure) RETURN node"
-query2 = "MATCH (node1:Figure {color: green}) RETURN node"
-query3 = "MATCH (node1:Figure)-[:BIGGER]->(node2:Figure) WHERE node1.x=10 RETURN node2"
-query4 = "MATCH (node1:Figure)-[:BIGGER]->(node2:Figure) WHERE node1.x=10 AND node2.y=15 RETURN node2"
 
 
 
