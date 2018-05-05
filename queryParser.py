@@ -35,10 +35,13 @@ class Parser():
         label = tokens[1].replace('(', '').split(':', 1)[1]
         properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',', 1)
         node_data = []
+        types = []
         for p in properties:
-            node_data.append(p.split(':', 1)[1])
-        return label, node_data
-        
+            v = p.split(':', 1)[1]
+            node_data.append(v)
+            types.append(type(v))
+        return label, node_data, types
+
 
     def _check_create(self, query):
         # TODO: implement checking correctness of the query
@@ -50,13 +53,11 @@ class Parser():
 
     def _match_by_properties(self, query):
         properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
-        props = []
         values = []
         for p in properties:
             temp = p.split(':', 1)
-            props.append(temp[0])
             values.append(temp[1])
-        return [props, values]
+        return [values]
 
     def _get_property_and_value(self, condition):
         prop = condition.split('.', 1)[1].split('=',1)[0]

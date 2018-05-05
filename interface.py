@@ -7,14 +7,14 @@ class Interface():
         self._executor = Executor()
 
     def add_figures(self, data):
-        # TODO: format data
         queries = []
         for d in data:
             x = round(d['x'], 2)
             y = round(d['y'], 2)
-            # if not self._check_existence(x, y):
-            #     query = "CREATE (node:Figure {x=%f, y=%f}) RETURN node" % (x, y)
-            #     nodes.append(query)
+            if not self._check_existence(x, y):
+                query = "CREATE (node:Figure {x: %f, y: %f}) RETURN node" % (x, y)
+                queries.append(query)
+        self._executor.execute_creation(queries)
 
     def _check_existence(self, x, y):
         query = "MATCH (node:Figure {x: %f, y: %f} RETURN node)" % (x, y)
