@@ -18,12 +18,12 @@ class Interface():
 
     def _check_existence(self, x, y):
         query = "MATCH (node:Figure {x: %f, y: %f} RETURN node)" % (x, y)
-        node = self._executor.execute_getting([query])
-        if None != node:
+        nodes = self._executor.execute_getting(query, checkExistence=True)
+        if 0 != len(nodes):
             return True
         else:
             return False
 
     def get_figures(self):
         query = input("Enter query: ")
-        return self._executor.execute_creation([query])
+        return self._executor.execute_getting(query)

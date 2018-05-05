@@ -22,7 +22,24 @@ class Executor():
                 properties.append(v)
             for i in range(1, len(properties) - 2):
                 properties[i].next_prop(properties[i+1])
+            assert(len(node_data) == len(properties))
             self._engine.create_node((label, properties[0]))
 
-    def execute_getting(self, queries):
-        pass
+    def execute_getting(self, query, checkExistence=False):
+        if checkExistence:
+            label, data = self._parser.parse(query)
+            label = Label(self._id, label)
+            properties = []
+            for p in data:
+                v = Property(self._id, PropertyType.STRING, label, p, None)
+                properties.append(v)
+            for i in range(1, len(properties) - 2):
+                properties[i].next_prop(properties[i+1])
+            assert(len(data) == len(properties))
+            return self._engine.match_pattern((label, properties), relationships=None)
+        else:
+            pass
+        
+# exec = Executor()
+# query = "MATCH (node:Figure {x: 9, y: 10}) RETURN node"
+# print(exec.execute_getting(query, True))

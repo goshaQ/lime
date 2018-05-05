@@ -22,7 +22,7 @@ class Parser():
             else:
                 return self._create_clause(tokens, query)
         elif "match" == tokens[0]:
-            return self._match_query(query)
+            return self._match_query(tokens, query)
         else:
             print("Only 'CREATE' and 'MATCH' clauses are available")
 
@@ -47,17 +47,37 @@ class Parser():
         # TODO: implement checking correctness of the query
         pass
 
-    def _match_query(self, query):
+    def _match_query(self, tokens, query):
         self._check_match(query)
-        return self._match_by_properties(query)
+        if "[:" in query:
+            return self._match_by_relations(query)
+        else:
+            label = tokens[1].replace('(', '').split(':', 1)[1]
+            return label, self._match_by_properties(query)
+
+    def _match_by_relations(self, query):
+        pass
+
+    def _get_direction(self, query):
+        direction = query.split(')', 1)[1].split('(', 1)[0]
+        first_part = direction.split('[', 1)[0]
+        second_part = direction.split(']', 1)[1]
+        direction = first_part + second_part
+        if "-->" == direction:
+            return 1
+        elif "<--" == direction:
+            return -1
+        elif "--" == direction:
+            return 0
+        else:
+            print("RTFM")
 
     def _match_by_properties(self, query):
         properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
         values = []
         for p in properties:
-            temp = p.split(':', 1)
-            values.append(temp[1])
-        return [values]
+            values.append(p.split(':', 1)[1])
+        return values
 
     def _get_property_and_value(self, condition):
         prop = condition.split('.', 1)[1].split('=',1)[0]
@@ -69,6 +89,7 @@ class Parser():
         pass
 
 
-
-
-
+# parser = Parser()
+# query = "MATCH (node1:Figure {x: 9, y:10})-[:LEFT]->(node2:Figure) RETURN node2"
+# query = "MATCH (node:Figure {x: 9, y: 10}) RETURN node"
+# parser.parse(query)
