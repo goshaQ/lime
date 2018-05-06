@@ -1,5 +1,5 @@
 import struct
-import config as cfg
+import src.io.config as cfg
 
 from src.engine.label import Label
 from src.engine.node import Node
@@ -82,16 +82,13 @@ class Packer:
         next = property.next_prop
         return struct.pack("? i i i i", in_use, property.type, key, property.value, next)
 
-    def pack_value(pointer: int, value: str) -> bytes:
+    def pack_value(next_pointer: int, value: str) -> bytes:
         """
         Packs a string into Dynamic_Store format
         Divides input string into chunks 24 bytes (adds padding if len(value)<24)
         :return: concatenated Dynamic_store formatted bytes
         """
-        blocks = b""
-        for i in range(0, len(value), 24):
-            pointer = pointer + cfg.STORE_SIZE
-            in_use = True
-            data = bytes(value[i:i + 24], encoding="utf8")
-            blocks = blocks + struct.pack("? i 24p", in_use, pointer, data)
-        return blocks
+        in_use = True
+        data = bytes(value, encoding="utf8")
+        repr = struct.pack("? i 24p", in_use, next_pointer, data)
+        return repr

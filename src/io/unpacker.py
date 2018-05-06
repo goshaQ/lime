@@ -1,5 +1,5 @@
 import struct
-import config as cfg
+import src.io.config as cfg
 
 from src.engine.label import Label
 from src.engine.node import Node
@@ -8,7 +8,15 @@ from src.engine.relationship import Relationship
 
 
 class Unpacker:
-    def unpack_store(id: int,store: bytes) -> str:
+    def unpack_store(id: int,store: bytes) -> (int,str):
+        """
+        Gets value from single Dynamic_Store byte
+        :return:
+        """
+        unpacked = struct.unpack("?i24p", store)
+        return unpacked[1],unpacked[2]
+
+    def unpack_store_bytes(id: int, store: bytes) -> str:
         """
         Gets value from single Dynamic_Store byte
         :return:
@@ -19,14 +27,15 @@ class Unpacker:
             value += unpacked[2]
         return value.decode("utf8")
 
-    def unpack_label(id: int,label: bytes) -> Label:
+    def unpack_label(id: int, label: bytes) -> int:
         """
         Gets label from single Label bytes
         :param label:
         :return:
         """
         unpacked = struct.unpack("? i",label)
-        return Label(id,unpacked[1])
+        return unpacked[1]
+
 
     def unpack_property(id: int,node: bytes) -> Property:
         """
