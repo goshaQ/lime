@@ -63,7 +63,7 @@ class Packer:
         if property.type == PropertyType.FLOAT:
             return struct.pack("? i i f i", in_use, property.type.value, key, property.value, next)
         elif property.type == PropertyType.CHAR:
-            return struct.pack("? i i c i", in_use, property.type.value, key, property.value, next)
+            return struct.pack("? i i p i", in_use, property.type.value, key, bytes(property.value,encoding="utf8"), next)
         elif property.type == PropertyType.BOOL:
             return struct.pack("? i i ? i",  in_use, property.type.value, key, property.value, next)
         elif property.type == PropertyType.BYTE:

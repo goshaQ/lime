@@ -102,7 +102,7 @@ class Io:
         for i in range(0, len(value)-24, 24):
             next_pointer = self._get_store_id()
             store = Packer.pack_value(next_pointer,value[:24])
-            value = value[24:]
+            value = value[23:]
             self._write_bytes(self.store,pointer,store)
             pointer = next_pointer
         next_pointer = config.INV_ID
@@ -127,9 +127,12 @@ class Io:
         :param id: offset of node to read
         :return: Node unpacked
         """
+        if id>self.last_property_id:
+            raise Exception('Property ID is out of range')
         node_bytes = self._read_bytes(self.nodes,id,cfg.NODE_SIZE)
-        node = Unpacker.unpack_node(id,node_bytes)
-        return node
+        label_id, prop_id, relation_id = Unpacker.unpack_node(id,node_bytes)
+        label = self.read_label(label_id)
+        return Node(id,label,prop_id,relation_id)
 
     def read_label(self, id) -> Label:
         """
@@ -158,6 +161,10 @@ class Io:
         type, label_id, value, next_property_id = Unpacker.unpack_property(property_bytes)
         if type == PropertyType.STRING.value:
             value = self.read_store(value)
+        if type == PropertyType.FLOAT.value:
+            value = float(value)
+        if type == PropertyType.CHAR.value:
+            value = value.decode("utf8")
         label = self.read_label(label_id)
         return Property(id,PropertyType(type),label,value,next_property_id)
 

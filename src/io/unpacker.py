@@ -33,29 +33,29 @@ class Unpacker:
         :return:
         """
         unpacked = struct.unpack("? i i i i",property)
-        if unpacked[1] == PropertyType.FLOAT:
+        if unpacked[1] == PropertyType.FLOAT.value:
             return struct.unpack("? i i f i", property)[1:]
-        elif unpacked[1] == PropertyType.CHAR:
-            return struct.unpack("? i i c i", property)[1:]
-        elif unpacked[1] == PropertyType.BOOL:
+        elif unpacked[1] == PropertyType.CHAR.value:
+            return struct.unpack("? i i p i", property)[1:]
+        elif unpacked[1] == PropertyType.BOOL.value:
             return struct.unpack("? i i ? i",  property)[1:]
-        elif unpacked[1] == PropertyType.BYTE:
+        elif unpacked[1] == PropertyType.BYTE.value:
             return struct.unpack("? i i c i", property)[1:]
-        elif unpacked[1] == PropertyType.INT:
+        elif unpacked[1] == PropertyType.INT.value:
             return struct.unpack("? i i i i",  property)[1:]
-        elif unpacked[1] == PropertyType.SHORT:
+        elif unpacked[1] == PropertyType.SHORT.value:
             return struct.unpack("? i i h i", property)[1:]
+        else:
+            return unpacked[1:]
 
-        return (unpacked[1],unpacked[2],unpacked[3],unpacked[4])
-
-    def unpack_node(id: int,node: bytes) -> Node:
+    def unpack_node(id: int,node: bytes) -> (int,int,int):
         """
         Gets node from single Node bytes
         :param node:
         :return:
         """
         unpacked = struct.unpack("? i i i",node)
-        return Node(id,unpacked[1],unpacked[2],unpacked[3])
+        return (unpacked[1],unpacked[2],unpacked[3])
 
     def unpack_relation(id: int,relation: bytes) -> Relationship:
         """
