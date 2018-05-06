@@ -57,11 +57,11 @@ class Unpacker:
         unpacked = struct.unpack("? i i i",node)
         return (unpacked[1],unpacked[2],unpacked[3])
 
-    def unpack_relation(id: int,relation: bytes) -> Relationship:
+    def unpack_relation(id: int,relation: bytes) -> ():
         """
         Gets relation from single Relation bytes
         :param node:
         :return:
         """
-        unpacked = struct.pack("? ? i i i i i i i", relation)
-        return Relationship(id,unpacked[1],unpacked[2],unpacked[3],unpacked[4],unpacked[5],unpacked[6],unpacked[7],unpacked[8],unpacked[9])
+        unpacked = struct.unpack("? ? i i i i i i i i", relation)
+        return (unpacked[1],unpacked[2],unpacked[3],unpacked[4],unpacked[5],unpacked[6],unpacked[7],unpacked[8],unpacked[9])

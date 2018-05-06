@@ -2,6 +2,7 @@ from src.engine.label import Label
 from src.engine.node import Node
 from src.engine.property import Property
 from src.engine.property_type import PropertyType
+from src.engine.relationship import Relationship
 from src.io.packer import Packer
 from src.io.unpacker import Unpacker
 from src.io.io import Io
@@ -99,13 +100,50 @@ class TestIO(unittest.TestCase):
         label = Label(config.INV_ID,value)
         prop_value = True
         property = Property(config.INV_ID,PropertyType.BOOL,label,prop_value,config.INV_ID)
-        node = Node(config.INV_ID,label,property)
+        property = io.write_property(property)
+        label = io.write_label(label)
+        node = Node(config.INV_ID,label,property,config.INV_ID)
         written = io.write_node(node)
         retrived = io.read_node(written.id)
         self.assertEqual(node.id,retrived.id)
-        self.assertEqual(node.next_prop,retrived.next_prop)
-        self.assertEqual(node.label,retrived.label)
+        self.assertEqual(node.next_prop.id,retrived.next_prop)
+        self.assertEqual(node.label.value,retrived.label.value)
+        self.assertEqual(node.label.id,retrived.label.id)
 
+    def test_relation_io(self):
+        io = Io()
+        value = "You spin my head right ground right ground"
+        label = Label(config.INV_ID,value)
+        label = io.write_label(label)
+        prop_value = True
+        property = Property(config.INV_ID,PropertyType.BOOL,label,prop_value,config.INV_ID)
+        property = io.write_property(property)
+        node = Node(config.INV_ID,label,property,config.INV_ID)
+        node2 = Node(config.INV_ID,label,property,config.INV_ID)
+        written1 = io.write_node(node)
+        written2 = io.write_node(node2)
+        relation = Relationship(config.INV_ID,False,written1,written2,label,property,config.INV_ID,config.INV_ID,config.INV_ID,config.INV_ID)
+        written = io.write_relation(relation)
+        retrieved = io.read_relation(written.id)
+        self.assertEqual(retrieved.label.value,value)
+        self.assertEqual(io.read_property(retrieved.next_prop).value,prop_value)
+        self.assertEqual(io.read_node(retrieved.first_node).id,written1.id)
+        self.assertEqual(io.read_node(retrieved.second_node).id,written2.id)
+
+    def test_get_nodes_io(self):
+        io = Io()
+        nodes = []
+        for i in range(0,10):
+            value = "Macarena"
+            label = Label(config.INV_ID, value)
+            label = io.write_label(label)
+            node = Node(config.INV_ID,label,config.INV_ID,config.INV_ID)
+            node = io.write_node(node)
+            nodes.append(node.id)
+        node_list = io.get_nodes_by_id(set(nodes))
+        for id,node in enumerate(node_list):
+            self.assertEqual(node.id,nodes[id])
+            self.assertEqual(node.label.value,"Macarena")
 
 if __name__ == '__main__':
 

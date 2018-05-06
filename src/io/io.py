@@ -23,7 +23,7 @@ class Io:
         self.properties = open(cfg.PROPERTY_FILENAME,"a+b")
         self.relations = open(cfg.RELATION_FILENAME,"a+b")
         self.store = open(cfg.STORE_FILANAME,"a+b")
-        self.last_node_id = int(os.stat(cfg.NODE_FILENAME).st_size / cfg.LABEL_SIZE)
+        self.last_node_id = int(os.stat(cfg.NODE_FILENAME).st_size / cfg.NODE_SIZE)
         self.last_relation_id = int(os.stat(cfg.RELATION_FILENAME).st_size / cfg.RELATION_SIZE)
         self.last_property_id = int(os.stat(cfg.PROPERTY_FILENAME).st_size / cfg.PROPERTY_SIZE)
         self.last_label_id = int(os.stat(cfg.LABEL_FILENAME).st_size / cfg.LABEL_SIZE)
@@ -51,6 +51,9 @@ class Io:
         if node.id == config.INV_ID:
             node.id = self._get_node_id()
         value = Packer.pack_node(node)
+        node.label = self.write_label(node.label)
+        if node.next_prop != config.INV_ID:
+            node.next_prop = self.write_property(node.next_prop)
         self._write_bytes(self.nodes,node.id*cfg.NODE_SIZE,value)
         return node
 
@@ -89,6 +92,9 @@ class Io:
         if relation.id == config.INV_ID:
             relation.id = self._get_relation_id()
         value = Packer.pack_relation(relation)
+        label = self.write_label(relation.label)
+        property = self.write_property(relation.next_prop)
+
         self._write_bytes(self.relations,relation.id*cfg.RELATION_SIZE,value)
         return relation
 
@@ -127,7 +133,7 @@ class Io:
         :param id: offset of node to read
         :return: Node unpacked
         """
-        if id>self.last_property_id:
+        if id>self.last_node_id:
             raise Exception('Property ID is out of range')
         node_bytes = self._read_bytes(self.nodes,id,cfg.NODE_SIZE)
         label_id, prop_id, relation_id = Unpacker.unpack_node(id,node_bytes)
@@ -174,9 +180,16 @@ class Io:
         :param id: offset of relation to read
         :return: Relation unpacked
         """
+        if id>self.last_relation_id:
+            raise Exception('Relation ID is out of range')
+
         relation_bytes = self._read_bytes(self.relations, id, cfg.RELATION_SIZE)
-        relation = Unpacker.unpack_relation(id,relation_bytes)
-        return relation
+        type, first_node, second_node, label, property, first_prev_relation, first_next_relation, second_prev_relation, second_next_realtion = Unpacker.unpack_relation(id,relation_bytes)
+        label = self.read_label(label)
+
+        return Relationship(id, type, first_node, second_node, label, property,
+                            first_prev_relation, first_next_relation, second_prev_relation, second_next_realtion)
+
 
     def read_store(self,id: int) -> str:
         """
@@ -205,13 +218,58 @@ class Io:
         return file.read(size)
 
 
+    def del_node(self,id:int):
+        """
+        Delets node and all corresponding properties and relatins
+        :param id: id to delete
+        :return: None
+        """
+        node = self.read_node(id)
+        new_bytes = Packer.pack_node(node,in_use=False)
+        self._write_bytes(self.nodes,id*cfg.NODE_SIZE,new_bytes)
+        self.del_property(node.next_prop)
+        self.del_relation(node.next_rel)
 
 
+    def del_relation(self,id:int):
+        relation = self.read_relation(id)
+        new_bytes = Packer.pack_relation(relation,in_use=False)
+        self._write_bytes(self.relations,id*cfg.RELATION_SIZE,new_bytes)
+        if relation.next_prop != config.INV_ID:
+            self.del_property(relation.next_prop)
+        if relation.first_node == config.INV_ID:
+            #TODO: Remove all first relationships
+        elif relation.second_node == config.INV_ID:
+            #TODO: Remove second relationships
+        else:
+            #TODO: Doouble linked list node swap
 
+    def del_property(self,id:int):
+        """
+        Marks signle property as unsued
+        :param id:
+        :return:
+        """
+        property = self.read_property(id)
+        if property.type == PropertyType.STRING:
+            new_bytes = Packer.pack_property_store(property,in_use=False)
+        else:
+            new_bytes = Packer.pack_property_inline(property,in_use=False)
+        if property.next_prop != config.INV_ID:
+            self.del_property(property.next_prop)
+        self._write_bytes(self.properties,id*cfg.PROPERTY_SIZE,new_bytes)
 
-
-
-
+    def del_store(self,id:int):
+        """
+        Marks single string as unused
+        :param id:
+        :return:
+        """
+        id,value = Unpacker.unpack_store(self._read_bytes(self.store,id,cfg.STORE_SIZE))
+        if id != config.INV_ID:
+            self.del_store(id)
+        new_bytes = Packer.pack_value(id,value,in_use=False)
+        self._write_bytes(self.store,id*cfg.STORE_SIZE,new_bytes)
 
 
     def _get_label_id(self) -> int:
@@ -228,9 +286,9 @@ class Io:
         Generates new pointer for node
         :return: pointer to node
         """
-
+        pointer = self.last_node_id
         self.last_node_id += 1
-        return self.last_node_id
+        return pointer
 
     def _get_store_id(self):
         """
