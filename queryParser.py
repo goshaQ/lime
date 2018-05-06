@@ -23,6 +23,9 @@ class Parser():
                 return self._create_clause(tokens, query)
         elif "match" == tokens[0]:
             return self._match_query(tokens, query)
+        elif "remove" == tokens[0]:
+            #TODO: Implement
+            pass
         else:
             print("Only 'CREATE' and 'MATCH' clauses are available")
 
@@ -64,7 +67,30 @@ class Parser():
             return label, self._match_by_properties(query)
 
     def _match_by_relations(self, query):
-        pass
+        """
+        A method for parsing query with relationships
+
+        :return nodes, relationships: A tuples with nodes data and relations data
+        """
+        node_properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
+        node_label = query.split('(', 1)[1].split(')', 1)[0].replace(' ', '').split(':', 1)[1].split('{', 1)[0]
+        node_values = []
+        for p in node_properties:
+            node_values.append(p.split(':', 1)[1])
+        relations = [] # [direction, label, properties]
+        while "[:" in query:
+            relations.append(self._get_direction(query)) # A direction
+            query = query.split('[:', 1)[1]
+            relations.append(query.split(']', 1)[0].split(' ', 1)[0]) # A label
+            label = query.split(':', 1)[0]
+            if '{' in label:
+                properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
+                prop = []
+                for p in properties:
+                    prop.append(p.split(':', 1)[1])
+                relations.append(prop)
+        return node_label, node_values, relations
+        
 
     def _get_direction(self, query):
         direction = query.split(')', 1)[1].split('(', 1)[0]
@@ -97,8 +123,8 @@ class Parser():
         pass
 
 
-parser = Parser()
-# query = "MATCH (node1:Figure {x: 9, y:10})-[:LEFT]->(node2:Figure) RETURN node2"
+# parser = Parser()
+# query = "MATCH (node1:Figure {x: 9, y:10})-[:LEFT {x:10, y: 0}]->(node2:Figure) RETURN node2"
 # query = "MATCH (node:Figure {x: 9, y: 10}) RETURN node"
-query = "CREATE INDEX (ind:Index {x: 10, y:10}) RETURN ind"
-parser.parse(query)
+# query = "CREATE INDEX (ind:Index {x: 10, y:10}) RETURN ind"
+# print(parser.parse(query))
