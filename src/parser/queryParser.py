@@ -28,8 +28,7 @@ class Parser():
         elif "match" == tokens[0]:
             return self._match_query(tokens, query)
         elif "remove" == tokens[0]:
-            #TODO: Implement
-            pass
+            return self._remove_clause(query)
         else:
             raise WrongStatement("RTFM")
 
@@ -125,3 +124,16 @@ class Parser():
     def _check_match(self, query):
         # TODO: implement checking correctness ofthe query
         pass
+    
+    def _remove_clause(self, query):
+        """
+        REMOVE (node:Figure {x: 10, y:10}) RETURN node
+        """
+        label = query.split(':', 1)[1].replace(' ', '').split('{', 1)[0]
+        properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
+        values = []
+        for p in properties:
+            values.append(p.split(':', 1)[1])
+        return label, values
+
+

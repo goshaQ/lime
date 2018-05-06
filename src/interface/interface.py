@@ -34,3 +34,7 @@ class Interface():
     def get_figures(self):
         query = input("Enter query: ")
         return self._executor.execute_getting(query)
+
+    def remove_node(self):
+        query = input("Enter query: ")
+        self._executor.execute_removing(query)

@@ -45,9 +45,7 @@ class Executor():
         
     def _create_relations(self, objects):
         relationCreator = RelationCreator()
-        # Create Rtree with objects
-        relationCreator.add_objects(objects)
-        # Get realtionhips for every object
+        relationCreator.add_objects(objects) 
         for obj in objects:
             left, right, up, down = relationCreator.get_relations(obj) # left = [label, properties[0]]
             if None != left:
@@ -101,3 +99,15 @@ class Executor():
                 relationships.append((label, None, direction))
 
             self._engine.match_pattern(nodes, relationships)
+
+    def execute_removing(self, query):
+        label, values = self._parser.parse(query)
+        label = Label(self._id, label)
+        properties = []
+        for p in values:
+            v = Property(self._id, PropertyType.STRING, label, p, None)
+            properties.append(v)
+        for i in range(len(properties) - 2):
+            properties[i].next_prop = properties[i+1]
+        assert(len(values) == len(properties))
+        self._engine.delete_node((label, properties))
