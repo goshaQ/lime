@@ -3,7 +3,7 @@ from label import Label
 from property import Property
 from property_type import PropertyType
 from graph_engine import GraphEngine
-# from relationCreator import RelationCreator
+from relationCreator import RelationCreator
 
 class Executor():
 
@@ -19,8 +19,8 @@ class Executor():
         for p in values:
             v = Property(self._id, PropertyType.STRING, label, p, None)
             properties.append(v)
-        for i in range(1, len(properties) - 2):
-            properties[i].next_prop(properties[i+1])
+        for i in range(len(properties) - 2):
+            properties[i].next_prop = properties[i+1]
         assert(len(values) == len(properties))
         # TODO: send to indexing in engine
 
@@ -33,20 +33,30 @@ class Executor():
             for p in node_data:
                 v = Property(self._id, PropertyType.STRING, label, p, None)
                 properties.append(v)
-            for i in range(1, len(properties) - 2):
-                properties[i].next_prop(properties[i+1])
+            for i in range(len(properties) - 2):
+                properties[i].next_prop = properties[i+1]
             assert(len(node_data) == len(properties))
             self._engine.create_node((label, properties[0]))
-            # Hardcoded:
-            objects.append([node_data[0], node_data[1]])
-        # self._create_relations(objects)
+            objects.append([label, properties[0]])
+        self._create_relations(objects)
         
     def _create_relations(self, objects):
-        # relationCreator = RelationCreator()
-        pass
+        relationCreator = RelationCreator()
+        # Create Rtree with objects
+        relationCreator.add_objects(objects)
+        # Get realtionhips for every object
+        for obj in objects:
+            left, right, up, down = relationCreator.get_relations(obj) # left = [label, properties[0]]
+            if None != left:
+                self._engine.create_relationship((obj[0], obj[1]), (left[0], left[1]), (Label(self._id, 'left'), None, 1))
+            if None != right:
+                self._engine.create_relationship((obj[0], obj[1]), (right[0], right[1]), (Label(self._id, 'right'), None, 1))
+            if None != up:    
+                self._engine.create_relationship((obj[0], obj[1]), (up[0], up[1]), (Label(self._id, 'up'), None, 1))
+            if None != down:
+                self._engine.create_relationship((obj[0], obj[1]), (down[0], down[1]), (Label(self._id, 'down'), None, 1))
 
         
-
     def execute_getting(self, query, checkExistence=False):
         if checkExistence:
             label, data = self._parser.parse(query)
@@ -55,8 +65,8 @@ class Executor():
             for p in data:
                 v = Property(self._id, PropertyType.STRING, label, p, None)
                 properties.append(v)
-            for i in range(1, len(properties) - 2):
-                properties[i].next_prop(properties[i+1])
+            for i in range(len(properties) - 2):
+                properties[i].next_prop = properties[i+1]
             assert(len(data) == len(properties))
             return self._engine.match_pattern((label, properties), relationships=None)
         else:
@@ -66,8 +76,8 @@ class Executor():
             for p in node_values:
                 v = Property(self._id, PropertyType.STRING, node_label, p, None)
                 properties.append(v)
-            for i in range(1, len(properties) - 2):
-                properties[i].next_prop(properties[i+1])
+            for i in range(len(properties) - 2):
+                properties[i].next_prop = properties[i+1]
             assert(len(node_values) == len(properties))
             nodes = [(node_label, properties)]
             relationships = []
@@ -78,8 +88,8 @@ class Executor():
                 for p in relations[2]:
                     v = Property(self._id, PropertyType.STRING, label, p, None)
                     properties.append(v)
-                for i in range(1, len(properties) - 2):
-                    properties[i].next_prop(properties[i+1])
+                for i in range(len(properties) - 2):
+                    properties[i].next_prop = properties[i+1]
                 assert(len(relations[2]) == len(properties))
                 relationships.append((label, properties, direction))
             else:
@@ -91,7 +101,12 @@ class Executor():
         
 # exec = Executor()
 # query = "MATCH (node:Figure {x: 9, y: 10}) RETURN node"
-# query = "MATCH (node1:Figure {x: 9, y:10})-[:LEFT {x:10, y: 0}]->(node2:Figure) RETURN node2"
+# query = "MATCH (node1:Figure {x: 9, y:10})-[:LEFT]->(node2:Figure) RETURN node2"
 # query = "CREATE INDEX (ind:Index {x: 10, y: 18}) RETURN ind"
 # exec.execute_indexing(query)
 # exec.execute_getting(query)
+# query = "CREATE (node:Figure {x: 10, y: 17, color: red}) RETURN node"
+# query2 = "CREATE (node:Figure {x: 7, y: 17, color: green}) RETURN node"
+# query3 = "CREATE (node:Figure {x: 7, y: 20, color: green}) RETURN node"
+# query4 = "CREATE (node:Figure {x: 7, y: 10, color: green}) RETURN node"
+# exec.execute_creation([query, query2, query3, query4])

@@ -44,7 +44,7 @@ class Parser():
     def _create_clause(self, tokens, query):
         self._check_create(query)
         label = tokens[1].replace('(', '').split(':', 1)[1]
-        properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',', 1)
+        properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
         node_data = []
         types = []
         for p in properties:
