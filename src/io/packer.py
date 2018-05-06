@@ -6,7 +6,7 @@ from src.engine.node import Node
 from src.engine.property import Property
 from src.engine.property_type import PropertyType
 from src.engine.relationship import Relationship
-
+import src.config as config
 
 class Packer:
 
@@ -56,7 +56,10 @@ class Packer:
         """
         in_use = True
         key = property.label.id
-        next = property.next_prop
+        if(property.next_prop == config.INV_ID):
+            next = property.next_prop
+        else:
+            next = property.next_prop.id
         if property.type == PropertyType.FLOAT:
             return struct.pack("? i i f i", in_use, property.type, key, property.value, next)
         elif property.type == PropertyType.CHAR:
@@ -79,8 +82,11 @@ class Packer:
         """
         in_use = True
         key = property.label.id
-        next = property.next_prop
-        return struct.pack("? i i i i", in_use, property.type, key, property.value, next)
+        if(property.next_prop == config.INV_ID):
+            next = property.next_prop
+        else:
+            next = property.next_prop.id
+        return struct.pack("? i i i i", in_use, property.type.value, key, value_pointer, next)
 
     def pack_value(next_pointer: int, value: str) -> bytes:
         """

@@ -142,19 +142,23 @@ class Io:
 
         label_bytes = self._read_bytes(self.labels, id, cfg.LABEL_SIZE)
 
-        store_id = Unpacker.unpack_label(id,label_bytes)
+        store_id = Unpacker.unpack_label(label_bytes)
         value = self.read_store(store_id)
         return Label(id,value)
 
-    def read_property(self, id) -> Property:
+    def read_property(self, id: int) -> Property:
         """
         Reads single property by it's id
         :param id: offset of property to read
         :return: Property unpacked
         """
+        if id>self.last_property_id:
+            raise Exception('Property ID is out of range')
         property_bytes = self._read_bytes(self.properties, id, cfg.PROPERTY_SIZE)
-        property = Unpacker.unpack_property(id,property_bytes)
-        return property
+        type, label_id, store_id, next_property_id = Unpacker.unpack_property(property_bytes)
+        value = self.read_store(store_id)
+        label = self.read_label(label_id)
+        return Property(id,PropertyType(type),label,value,next_property_id)
 
     def read_relation(self, id) -> Relationship:
         """
@@ -177,7 +181,7 @@ class Io:
             raise Exception('Id is out of range')
         while(id != config.INV_ID):
             store_bytes = self._read_bytes(self.store,id,cfg.STORE_SIZE)
-            id,chunk = Unpacker.unpack_store(id,store_bytes)
+            id,chunk = Unpacker.unpack_store(store_bytes)
             value += chunk
         return value.decode("utf8")
 

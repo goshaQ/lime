@@ -8,7 +8,7 @@ from src.engine.relationship import Relationship
 
 
 class Unpacker:
-    def unpack_store(id: int,store: bytes) -> (int,str):
+    def unpack_store(store: bytes) -> (int,str):
         """
         Gets value from single Dynamic_Store byte
         :return:
@@ -16,18 +16,7 @@ class Unpacker:
         unpacked = struct.unpack("?i24p", store)
         return unpacked[1],unpacked[2]
 
-    def unpack_store_bytes(id: int, store: bytes) -> str:
-        """
-        Gets value from single Dynamic_Store byte
-        :return:
-        """
-        value = b""
-        for i in range(0, len(store), struct.calcsize("?i24p")):
-            unpacked = struct.unpack("?i24p", store[i:i + cfg.STORE_SIZE])
-            value += unpacked[2]
-        return value.decode("utf8")
-
-    def unpack_label(id: int, label: bytes) -> int:
+    def unpack_label(label: bytes) -> int:
         """
         Gets label from single Label bytes
         :param label:
@@ -36,15 +25,14 @@ class Unpacker:
         unpacked = struct.unpack("? i",label)
         return unpacked[1]
 
-
-    def unpack_property(id: int,node: bytes) -> Property:
+    def unpack_property(property: bytes) -> (int,int,int):
         """
         Gets property from single Property bytes
-        :param node:
+        :param property:
         :return:
         """
-        unpacked = struct.unpack("? i i i",node)
-        return Property(id,unpacked[0],unpacked[1],unpacked[2],unpacked[3])
+        unpacked = struct.unpack("? i i i i",property)
+        return (unpacked[1],unpacked[2],unpacked[3],unpacked[4])
 
     def unpack_node(id: int,node: bytes) -> Node:
         """
