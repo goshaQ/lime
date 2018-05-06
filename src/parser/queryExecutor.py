@@ -1,8 +1,11 @@
+import sys
+sys.path.append('')
+
 from queryParser import Parser
-from label import Label
-from property import Property
-from property_type import PropertyType
-from graph_engine import GraphEngine
+from src.engine.label import Label
+from src.engine.property import Property
+from src.engine.property_type import PropertyType
+from src.engine.graph_engine import GraphEngine
 from relationCreator import RelationCreator
 
 class Executor():
@@ -98,15 +101,3 @@ class Executor():
                 relationships.append((label, None, direction))
 
             self._engine.match_pattern(nodes, relationships)
-        
-# exec = Executor()
-# query = "MATCH (node:Figure {x: 9, y: 10}) RETURN node"
-# query = "MATCH (node1:Figure {x: 9, y:10})-[:LEFT]->(node2:Figure) RETURN node2"
-# query = "CREATE INDEX (ind:Index {x: 10, y: 18}) RETURN ind"
-# exec.execute_indexing(query)
-# exec.execute_getting(query)
-# query = "CREATE (node:Figure {x: 10, y: 17, color: red}) RETURN node"
-# query2 = "CREATE (node:Figure {x: 7, y: 17, color: green}) RETURN node"
-# query3 = "CREATE (node:Figure {x: 7, y: 20, color: green}) RETURN node"
-# query4 = "CREATE (node:Figure {x: 7, y: 10, color: green}) RETURN node"
-# exec.execute_creation([query, query2, query3, query4])

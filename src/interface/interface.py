@@ -1,4 +1,7 @@
-from queryExecutor import Executor
+import sys
+sys.path.append('')
+
+from src.parser.queryExecutor import Executor
 import json
 
 class Interface():

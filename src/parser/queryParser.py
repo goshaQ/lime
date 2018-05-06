@@ -1,3 +1,7 @@
+import sys
+sys.path.append('')
+from src.errors.WrongStatement import WrongStatement
+
 """
     This class parses queries with "CREATE" and "MATCH" clauses.
 """
@@ -27,7 +31,7 @@ class Parser():
             #TODO: Implement
             pass
         else:
-            print("Only 'CREATE' and 'MATCH' clauses are available")
+            raise WrongStatement("RTFM")
 
     def _create_index(self, tokens, query):
         """
@@ -121,10 +125,3 @@ class Parser():
     def _check_match(self, query):
         # TODO: implement checking correctness ofthe query
         pass
-
-
-# parser = Parser()
-# query = "MATCH (node1:Figure {x: 9, y:10})-[:LEFT {x:10, y: 0}]->(node2:Figure) RETURN node2"
-# query = "MATCH (node:Figure {x: 9, y: 10}) RETURN node"
-# query = "CREATE INDEX (ind:Index {x: 10, y:10}) RETURN ind"
-# print(parser.parse(query))
