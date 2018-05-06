@@ -41,6 +41,23 @@ class TestIO(unittest.TestCase):
         self.assertEqual(property.label.value,retrieved.label.value)
         self.assertEqual(property.next_prop,retrieved.next_prop)
 
+    def test_bool_property_io(self):
+        io = Io()
+        value = "I LOVE ADB"
+        prop_value = True
+        label = Label(config.INV_ID,value)
+        label = io.write_label(label)
+        property = Property(config.INV_ID,PropertyType.BOOL,label,prop_value,config.INV_ID)
+        written = io.write_property(property)
+        retrieved = io.read_property(written.id)
+        self.assertEqual(property.id,retrieved.id)
+        self.assertEqual(property.value,retrieved.value)
+        self.assertEqual(property.type.value,retrieved.type.value)
+        self.assertEqual(property.label.value,retrieved.label.value)
+        self.assertEqual(property.next_prop,retrieved.next_prop)
+
+
+
 if __name__ == '__main__':
 
     unittest.main()

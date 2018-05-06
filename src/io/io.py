@@ -73,7 +73,7 @@ class Io:
         """
         if property.id == config.INV_ID:
             property.id = self._get_property_id()
-        if property.type == PropertyType.STRING:
+        if property.type.value == PropertyType.STRING.value:
             store_pointer = self.write_store(property.value)
             value = Packer.pack_property_store(store_pointer,property)
         else:
@@ -155,8 +155,9 @@ class Io:
         if id>self.last_property_id:
             raise Exception('Property ID is out of range')
         property_bytes = self._read_bytes(self.properties, id, cfg.PROPERTY_SIZE)
-        type, label_id, store_id, next_property_id = Unpacker.unpack_property(property_bytes)
-        value = self.read_store(store_id)
+        type, label_id, value, next_property_id = Unpacker.unpack_property(property_bytes)
+        if type == PropertyType.STRING.value:
+            value = self.read_store(value)
         label = self.read_label(label_id)
         return Property(id,PropertyType(type),label,value,next_property_id)
 

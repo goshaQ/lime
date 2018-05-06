@@ -4,6 +4,7 @@ import src.io.config as cfg
 from src.engine.label import Label
 from src.engine.node import Node
 from src.engine.property import Property
+from src.engine.property_type import PropertyType
 from src.engine.relationship import Relationship
 
 
@@ -32,6 +33,19 @@ class Unpacker:
         :return:
         """
         unpacked = struct.unpack("? i i i i",property)
+        if unpacked[1] == PropertyType.FLOAT:
+            return struct.unpack("? i i f i", property)[1:]
+        elif unpacked[1] == PropertyType.CHAR:
+            return struct.unpack("? i i c i", property)[1:]
+        elif unpacked[1] == PropertyType.BOOL:
+            return struct.unpack("? i i ? i",  property)[1:]
+        elif unpacked[1] == PropertyType.BYTE:
+            return struct.unpack("? i i c i", property)[1:]
+        elif unpacked[1] == PropertyType.INT:
+            return struct.unpack("? i i i i",  property)[1:]
+        elif unpacked[1] == PropertyType.SHORT:
+            return struct.unpack("? i i h i", property)[1:]
+
         return (unpacked[1],unpacked[2],unpacked[3],unpacked[4])
 
     def unpack_node(id: int,node: bytes) -> Node:

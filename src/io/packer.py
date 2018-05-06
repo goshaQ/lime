@@ -61,17 +61,17 @@ class Packer:
         else:
             next = property.next_prop.id
         if property.type == PropertyType.FLOAT:
-            return struct.pack("? i i f i", in_use, property.type, key, property.value, next)
+            return struct.pack("? i i f i", in_use, property.type.value, key, property.value, next)
         elif property.type == PropertyType.CHAR:
-            return struct.pack("? i i c i", in_use, property.type, key, property.value, next)
+            return struct.pack("? i i c i", in_use, property.type.value, key, property.value, next)
         elif property.type == PropertyType.BOOL:
-            return struct.pack("? i i ? i",  in_use, property.type, key, property.value, next)
+            return struct.pack("? i i ? i",  in_use, property.type.value, key, property.value, next)
         elif property.type == PropertyType.BYTE:
-            return struct.pack("? i i c i",  in_use, property.type, key, property.value, next)
+            return struct.pack("? i i c i",  in_use, property.type.value, key, property.value, next)
         elif property.type == PropertyType.INT:
-            return struct.pack("? i i i i",  in_use, property.type, key, property.value, next)
+            return struct.pack("? i i i i",  in_use, property.type.value, key, property.value, next)
         elif property.type == PropertyType.SHORT:
-            return struct.pack("? i i h i",  in_use, property.type, key, property.value, next)
+            return struct.pack("? i i h i",  in_use, property.type.value, key, property.value, next)
 
 
     def pack_property_store(value_pointer: int, property: Property) -> bytes:
