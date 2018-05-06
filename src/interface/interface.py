@@ -1,6 +1,5 @@
 import sys
 sys.path.append('')
-
 from src.parser.queryExecutor import Executor
 import json
 
@@ -26,7 +25,7 @@ class Interface():
     def _check_existence(self, x, y):
         query = "MATCH (node:Figure {x: %f, y: %f} RETURN node)" % (x, y)
         nodes = self._executor.execute_getting(query, checkExistence=True)
-        if 0 != len(nodes):
+        if None != nodes:
             return True
         else:
             return False

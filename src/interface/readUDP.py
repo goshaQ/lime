@@ -13,3 +13,4 @@ def read():
         data, addr = sock.recvfrom(1024)
         data = json.loads(data)
         INTERFACE.add_figures(data['data'])
+        print(data)

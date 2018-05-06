@@ -1,12 +1,12 @@
 import sys
 sys.path.append('')
 
-from queryParser import Parser
+from src.parser.queryParser import Parser
 from src.engine.label import Label
 from src.engine.property import Property
 from src.engine.property_type import PropertyType
 from src.engine.graph_engine import GraphEngine
-from relationCreator import RelationCreator
+from src.parser.relationCreator import RelationCreator
 
 class Executor():
 
@@ -22,8 +22,9 @@ class Executor():
         for p in values:
             v = Property(self._id, PropertyType.STRING, label, p, None)
             properties.append(v)
-        for i in range(len(properties) - 2):
-            properties[i].next_prop = properties[i+1]
+        # for i in range(len(properties) - 2):
+        #     properties[i].next_prop(properties[i+1]) 
+        properties[0].next_prop = properties[1]
         assert(len(values) == len(properties))
         # TODO: send to indexing in engine
 
@@ -36,8 +37,9 @@ class Executor():
             for p in node_data:
                 v = Property(self._id, PropertyType.STRING, label, p, None)
                 properties.append(v)
-            for i in range(len(properties) - 2):
-                properties[i].next_prop = properties[i+1]
+            # for i in range(0, len(properties) - 2):
+                # properties[i].next_prop = properties[i+1]
+            properties[0].next_prop = properties[1]
             assert(len(node_data) == len(properties))
             self._engine.create_node((label, properties[0]))
             objects.append([label, properties[0]])
@@ -66,8 +68,9 @@ class Executor():
             for p in data:
                 v = Property(self._id, PropertyType.STRING, label, p, None)
                 properties.append(v)
-            for i in range(len(properties) - 2):
-                properties[i].next_prop = properties[i+1]
+            # for i in range(len(properties) - 2):
+            #     properties[i].next_prop(properties[i+1]) 
+            properties[0].next_prop = properties[1]
             assert(len(data) == len(properties))
             return self._engine.match_pattern((label, properties), relationships=None)
         else:
@@ -77,8 +80,9 @@ class Executor():
             for p in node_values:
                 v = Property(self._id, PropertyType.STRING, node_label, p, None)
                 properties.append(v)
-            for i in range(len(properties) - 2):
-                properties[i].next_prop = properties[i+1]
+            # for i in range(len(properties) - 2):
+            #     properties[i].next_prop(properties[i+1]) 
+            properties[0].next_prop = properties[1]
             assert(len(node_values) == len(properties))
             nodes = [(node_label, properties)]
             relationships = []
@@ -89,8 +93,9 @@ class Executor():
                 for p in relations[2]:
                     v = Property(self._id, PropertyType.STRING, label, p, None)
                     properties.append(v)
-                for i in range(len(properties) - 2):
-                    properties[i].next_prop = properties[i+1]
+                # for i in range(len(properties) - 2):
+                #     properties[i].next_prop = properties[i+1]
+                properties[0].next_prop = properties[1]
                 assert(len(relations[2]) == len(properties))
                 relationships.append((label, properties, direction))
             else:
@@ -107,7 +112,8 @@ class Executor():
         for p in values:
             v = Property(self._id, PropertyType.STRING, label, p, None)
             properties.append(v)
-        for i in range(len(properties) - 2):
-            properties[i].next_prop = properties[i+1]
+        # for i in range(len(properties) - 2):
+        #     properties[i].next_prop = properties[i+1]
+        properties[0].next_prop = properties[1]
         assert(len(values) == len(properties))
         self._engine.delete_node((label, properties))
