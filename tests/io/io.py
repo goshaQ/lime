@@ -128,6 +128,8 @@ class TestIO(unittest.TestCase):
         self.assertEqual(retrieved.next_prop.value,prop_value)
         self.assertEqual(retrieved.first_node.id,written1.id)
         self.assertEqual(retrieved.second_node.id,written2.id)
+        self.assertEqual(written2.next_rel,retrieved.id)
+        self.assertEqual(written1.next_rel,retrieved.id)
 
     def test_get_nodes_io(self):
         io = Io()
