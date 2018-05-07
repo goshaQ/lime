@@ -77,6 +77,8 @@ class Io:
         :param node to pack:
         :return: byte represenation of string
         """
+        if node.next_prop == None:
+            node.next_prop = cfg.INV_ID
         if node.id == cfg.INV_ID:
             node.id = self._get_node_id()
         value = Packer.pack_node(node)
@@ -118,6 +120,9 @@ class Io:
         Writes relation to file.
         :param relation - relation written:
         """
+        if relation.next_prop == None:
+            relation.next_prop = cfg.INV_ID
+
         if relation.id == cfg.INV_ID:
             relation.id = self._get_relation_id()
         value = Packer.pack_relation(relation)
@@ -173,11 +178,11 @@ class Io:
             next_pointer = self._get_store_id()
             store = Packer.pack_value(next_pointer,value[:24])
             value = value[23:]
-            self._write_bytes(self.store,pointer,store)
+            self._write_bytes(self.store,pointer*cfg.STORE_SIZE,store)
             pointer = next_pointer
         next_pointer = cfg.INV_ID
         store = Packer.pack_value(next_pointer, value[:24])
-        self._write_bytes(self.store, pointer, store)
+        self._write_bytes(self.store, pointer*cfg.STORE_SIZE, store)
         return first_pointer
 
     def _write_bytes(self,file,pointer:int,data:bytes):
@@ -373,7 +378,7 @@ class Io:
         elif(current.second_node == next_rel.first_node):
             next_rel.first_prev_id = cfg.INV_ID
         prev_packed = Packer.pack_relation(next_rel)
-        self._write_bytes(self.relations, next_rel.id, prev_packed)
+        self._write_bytes(self.relations, next_rel.id*cfg.RELATION_SIZE, prev_packed)
 
     def _fix_prev_rel(self,current: Relationship,prev_rel: Relationship):
         """
@@ -387,7 +392,7 @@ class Io:
         elif(current.second_node == prev_rel.first_node):
             prev_rel.first_next_id = cfg.INV_ID
         prev_packed = Packer.pack_relation(prev_rel)
-        self._write_bytes(self.relations, prev_rel.id, prev_packed)
+        self._write_bytes(self.relations, prev_rel.id*cfg.RELATION_SIZE, prev_packed)
 
     def _swap_relation_pointer(self,next: Relationship, prev: Relationship):
         """
@@ -413,8 +418,8 @@ class Io:
 
         second_prev_rel_packed = Packer.pack_relation(prev)
         second_next_rel_packed = Packer.pack_relation(next)
-        self._write_bytes(self.relations, next.id, second_next_rel_packed)
-        self._write_bytes(self.relations, prev.id, second_prev_rel_packed)
+        self._write_bytes(self.relations, next.id*cfg.RELATION_SIZE, second_next_rel_packed)
+        self._write_bytes(self.relations, prev.id*cfg.RELATION_SIZE, second_prev_rel_packed)
 
     def del_property(self,id:int):
         """
