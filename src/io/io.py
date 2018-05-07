@@ -81,7 +81,7 @@ class Io:
             node.id = self._get_node_id()
         value = Packer.pack_node(node)
         node.label = self.write_label(node.label)
-        if node.next_prop != config.INV_ID:
+        if node.next_prop != cfg.INV_ID:
             node.next_prop = self.write_property(node.next_prop)
         self._write_bytes(self.nodes,node.id*cfg.NODE_SIZE,value)
         return node
@@ -240,7 +240,7 @@ class Io:
         value = b""
         if id>self.last_store_id:
             raise Exception('Id is out of range')
-        while(id != config.INV_ID):
+        while(id != cfg.INV_ID):
             store_bytes = self._read_bytes(self.store,id,cfg.STORE_SIZE)
             id,chunk = Unpacker.unpack_store(store_bytes)
             value += chunk
@@ -274,31 +274,31 @@ class Io:
         new_bytes = Packer.pack_relation(relation,in_use=False)
         self._write_bytes(self.relations,id*cfg.RELATION_SIZE,new_bytes)
         self.del_property(relation.next_prop)
-        if relation.next_prop != config.INV_ID:
+        if relation.next_prop != cfg.INV_ID:
             self.del_property(relation.next_prop)
-        if (relation.second_next_rel != config.INV_ID) and (relation.second_prev_rel != config.INV_ID):
+        if (relation.second_next_rel != cfg.INV_ID) and (relation.second_prev_rel != cfg.INV_ID):
             second_next_rel = self.read_relation(relation.second_next_rel)
             second_prev_rel = self.read_relation(relation.second_prev_rel)
             self._swap_relation_pointer(second_next_rel,second_prev_rel)
 
-        elif (relation.second_next_rel != config.INV_ID) and not (relation.second_prev_rel != config.INV_ID):
+        elif (relation.second_next_rel != cfg.INV_ID) and not (relation.second_prev_rel != cfg.INV_ID):
             second_next_rel = self.read_relation(relation.second_next_rel)
             self._fix_next_rel(relation,second_next_rel)
 
-        elif (relation.second_prev_rel != config.INV_ID) and not (relation.second_next_rel != config.INV_ID):
+        elif (relation.second_prev_rel != cfg.INV_ID) and not (relation.second_next_rel != cfg.INV_ID):
             second_prev_rel = self.read_relation(relation.second_prev_rel)
             self._fix_prev_rel(relation,second_prev_rel)
 
-        if (relation.first_next_rel != config.INV_ID) and (relation.first_prev_rel != config.INV_ID):
+        if (relation.first_next_rel != cfg.INV_ID) and (relation.first_prev_rel != cfg.INV_ID):
             first_next_rel = self.read_relation(relation.first_next_rel)
             first_prev_rel = self.read_relation(relation.first_prev_rel)
             self._swap_relation_pointer(first_next_rel,first_prev_rel)
 
-        elif (relation.first_next_rel != config.INV_ID) and not (relation.first_prev_rel != config.INV_ID):
+        elif (relation.first_next_rel != cfg.INV_ID) and not (relation.first_prev_rel != cfg.INV_ID):
             first_next_rel = self.read_relation(relation.first_next_rel)
             self._fix_next_rel(relation,first_next_rel)
 
-        elif (relation.first_prev_rel != config.INV_ID) and not (relation.first_next_rel != config.INV_ID):
+        elif (relation.first_prev_rel != cfg.INV_ID) and not (relation.first_next_rel != cfg.INV_ID):
             first_prev_rel = self.read_relation(relation.first_prev_rel)
             self._fix_prev_rel(relation,first_prev_rel)
 
@@ -324,9 +324,9 @@ class Io:
         :return:
         """
         if(current.second_node == next_rel.second_node):
-            next_rel.second_prev_id = config.INV_ID
+            next_rel.second_prev_id = cfg.INV_ID
         elif(current.second_node == next_rel.first_node):
-            next_rel.first_prev_id = config.INV_ID
+            next_rel.first_prev_id = cfg.INV_ID
         prev_packed = Packer.pack_relation(next_rel)
         self._write_bytes(self.relations, next_rel.id, prev_packed)
 
@@ -338,9 +338,9 @@ class Io:
         :return:
         """
         if(current.second_node == prev_rel.second_node):
-            prev_rel.second_next_id = config.INV_ID
+            prev_rel.second_next_id = cfg.INV_ID
         elif(current.second_node == prev_rel.first_node):
-            prev_rel.first_next_id = config.INV_ID
+            prev_rel.first_next_id = cfg.INV_ID
         prev_packed = Packer.pack_relation(prev_rel)
         self._write_bytes(self.relations, prev_rel.id, prev_packed)
 
@@ -382,7 +382,7 @@ class Io:
             new_bytes = Packer.pack_property_store(property,in_use=False)
         else:
             new_bytes = Packer.pack_property_inline(property,in_use=False)
-        if property.next_prop != config.INV_ID:
+        if property.next_prop != cfg.INV_ID:
             self.del_property(property.next_prop)
         self._write_bytes(self.properties,id*cfg.PROPERTY_SIZE,new_bytes)
 
@@ -393,7 +393,7 @@ class Io:
         :return:
         """
         id,value = Unpacker.unpack_store(self._read_bytes(self.store,id,cfg.STORE_SIZE))
-        if id != config.INV_ID:
+        if id != cfg.INV_ID:
             self.del_store(id)
         new_bytes = Packer.pack_value(id,value,in_use=False)
         self._write_bytes(self.store,id*cfg.STORE_SIZE,new_bytes)

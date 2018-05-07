@@ -9,6 +9,7 @@ from src.io.io import Io
 import unittest
 import src.config as config
 
+
 class TestIO(unittest.TestCase):
 
     def test_store_io(self):
