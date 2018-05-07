@@ -67,9 +67,9 @@ class Packer:
         else:
             property = node.next_prop.id
 
-        if (node.next_rel == cfg.INV_ID)  or (node.next_rel is None):
+        if (node.next_rel == cfg.INV_ID) or (node.next_rel is None):
             relation = cfg.INV_ID
-        elif type(node.next_rel) == Relationship:
+        elif type(node.next_rel) is Relationship:
             relation = node.next_rel.id
         else:
             relation = node.next_rel
@@ -81,7 +81,7 @@ class Packer:
         :return:
         """
         key = property.label.id
-        if(property.next_prop == cfg.INV_ID) or (property.next_prop == None):
+        if(property.next_prop == cfg.INV_ID) or (property.next_prop is None):
             next = cfg.INV_ID
         else:
             next = property.next_prop.id
