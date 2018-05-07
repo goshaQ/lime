@@ -10,7 +10,11 @@ git clone https://github.com/goshaQ/lime
 cd lime/
 
 pip3 install -r requirements.txt
+```
+Additionally install [libspatialindex](http://libspatialindex.github.io/index.html)
 
+### Running
+```
 python3 cli.py
 ```
 
