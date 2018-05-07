@@ -20,6 +20,12 @@ class Interface():
                 query = "CREATE (node:Figure {x: %f, y: %f}) RETURN node" % (x, y)
                 queries.append(query)
         self._executor.execute_creation(queries)
+    
+    def add_figure(self, query):
+        self._executor.execute_creation([query])
+
+    def add_relationship(self, query):
+        pass
 
     def _check_existence(self, x, y):
         query = "MATCH (node:Figure {x: %f, y: %f} RETURN node)" % (x, y)

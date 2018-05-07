@@ -95,5 +95,18 @@ class ParserTest(unittest.TestCase):
         self.assertTrue('left' == relations[1])
         self.assertTrue('14' == relations[2][0])
 
+    def testMatchWithRelation6(self):
+        query = "MATCH (a:Figure {x: 10}), (b:Figure {x: 10, y:15}) CREATE (a)-[r:LEFT {color: red}]->(b) RETURN a, b"
+        labels, properties, direction, rel_type, rel_props = self._parser.parse(query)
+        self.assertTrue('figure' == labels[0])
+        self.assertTrue('figure' == labels[1])
+        self.assertTrue('10' == properties[0][0])
+        self.assertTrue('10' == properties[1][0])
+        self.assertTrue('15' == properties[1][1])
+        self.assertTrue(1 == direction)
+        self.assertTrue('left' == rel_type)
+        self.assertTrue('red' == rel_props[0])
+        
+
 if __name__ == "__main__":
-    unittest.main() # run all tests
+    unittest.main()

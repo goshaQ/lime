@@ -17,6 +17,7 @@ class CLI():
     def userQueryListener(self):
         f = open(CLI_FILE, 'r')
         print(f.read())
+        # TODO; add showing results
         while True:
             user_input = input(">>> ")
             if ":help" in user_input:
@@ -24,6 +25,12 @@ class CLI():
             elif ":search" in user_input:
                 query = input("Enter query: ")
                 self._interface.get_figures(query)
+            elif ":node" in user_input:
+                query = input("Enter query: ")
+                self._interface.add_figure(query)
+            elif ":relationship" in user_input:
+                query = input("Enter query: ")
+                self._interface.add_relationship(query)
             elif ":index" in user_input:
                 query = input("Enter query: ")
                 self._interface.add_index(query)
@@ -39,8 +46,4 @@ class CLI():
 
 if __name__ == "__main__":    
     cli = CLI()
-    # reading = multiprocessing.Process(name="Reading data thread", target=cli.dataListener())
-    # listening = multiprocessing.Process(name="User query thread", target=cli.userQueryListener())
-    # listening.start()
-    # reading.start()
     cli.userQueryListener()

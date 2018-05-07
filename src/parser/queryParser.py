@@ -26,11 +26,44 @@ class Parser():
             else:
                 return self._create_clause(tokens, query)
         elif "match" == tokens[0]:
-            return self._match_query(tokens, query)
+            if "create" in query:
+                return self._create_relationship(query)
+            else:
+                return self._match_query(tokens, query)
         elif "remove" == tokens[0]:
             return self._remove_clause(query)
         else:
             raise WrongStatement("RTFM")
+
+    def _create_relationship(self, query):
+        """
+        MATCH (a:Figure {x: 10}), (b:Figure {x: 10, y:15})
+        CREATE (a)-[r:LEFT {color: red}]->(b)
+        RETURN a, b
+        """
+        label_first = query.split(":", 1)[1].split(")", 1)[0].replace(' ', '').split('{', 1)[0]
+        label_second = query.split(",", 1)[1].split(":", 1)[1].split(")", 1)[0].replace(' ', '').split('{', 1)[0]
+
+        properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
+        properties_first = []
+        for p in properties:
+            properties_first.append(p.split(':', 1)[1])
+        properties = query.split(',', 1)[1].split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
+        properties_second = []
+        for p in properties:
+            properties_second.append(p.split(':', 1)[1])
+
+        direction = self._get_direction(query.split("create", 1)[1])
+        
+        rel_type = query.split('create', 1)[1].split(':', 1)[1].split(']', 1)[0].replace(' ', '')
+        rel_prop = []
+        if '{' in rel_type:
+            properties = rel_type.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
+            rel_type = rel_type.split('{', 1)[0]
+            for p in properties:
+                rel_prop.append(p.split(':', 1)[1])
+        return [label_first, label_second], [properties_first, properties_second], direction, rel_type, rel_prop
+        
 
     def _create_index(self, tokens, query):
         """
@@ -143,5 +176,3 @@ class Parser():
         for p in properties:
             values.append(p.split(':', 1)[1])
         return label, values
-
-

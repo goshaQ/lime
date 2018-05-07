@@ -10,6 +10,8 @@
  Type:
  - :help - if you want to read helper
  - :search - if you want to search in the Database
+ - :node - if you want to add a new node
+ - :relationship - if you want to add a new relationship
  - :index - if you want to add an index
  - :remove - if you want to remove the node
  - :quit - close the program
