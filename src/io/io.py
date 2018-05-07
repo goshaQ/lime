@@ -285,22 +285,43 @@ class Io:
             second_next_rel = self.read_relation(relation.second_next_rel)
             second_prev_rel = self.read_relation(relation.second_prev_rel)
             self._swap_relation_pointer(second_next_rel,second_prev_rel)
+
         elif (relation.second_next_rel != config.INV_ID) and not (relation.second_prev_rel != config.INV_ID):
             second_next_rel = self.read_relation(relation.second_next_rel)
             self._fix_next_rel(relation,second_next_rel)
+
         elif (relation.second_prev_rel != config.INV_ID) and not (relation.second_next_rel != config.INV_ID):
             second_prev_rel = self.read_relation(relation.second_prev_rel)
             self._fix_prev_rel(relation,second_prev_rel)
+
         if (relation.first_next_rel != config.INV_ID) and (relation.first_prev_rel != config.INV_ID):
             first_next_rel = self.read_relation(relation.first_next_rel)
             first_prev_rel = self.read_relation(relation.first_prev_rel)
             self._swap_relation_pointer(first_next_rel,first_prev_rel)
+
         elif (relation.first_next_rel != config.INV_ID) and not (relation.first_prev_rel != config.INV_ID):
             first_next_rel = self.read_relation(relation.first_next_rel)
             self._fix_next_rel(relation,first_next_rel)
+
         elif (relation.first_prev_rel != config.INV_ID) and not (relation.first_next_rel != config.INV_ID):
             first_prev_rel = self.read_relation(relation.first_prev_rel)
             self._fix_prev_rel(relation,first_prev_rel)
+
+        node2 = self.read_node(relation.second_node)
+        node1 = self.read_node(relation.first_node)
+        self._fix_node_rel(relation, node1)
+        self._fix_node_rel(relation, node2)
+
+
+    def _fix_node_rel(self,current: Relationship,node:Node):
+        if node.id == current.first_node:
+            if node.next_rel == current.id:
+                node.next_rel = current.first_next_rel
+        if node.id == current.second_node:
+            if node.next_rel == current.id:
+                node.next_rel = current.second_next_rel
+        self.write_node(node)
+
 
     def _fix_next_rel(self,current: Relationship,next_rel: Relationship):
         """
