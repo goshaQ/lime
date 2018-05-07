@@ -51,6 +51,9 @@ After running the `cli.py` two threads are created:
 - :search - if you want to search in the Database
 - :quit - close the program
 
+### Attention
+Whitespaces in queries are matter!
+
 ### Insert nodes
 There are two possible ways for adding data to the database:
 - Through UDP messages (mentioned before)
