@@ -25,12 +25,12 @@ class Interface():
         self._executor.execute_creation([query])
 
     def add_relationship(self, query):
-        pass
+        self._executor.add_relationship(query)
 
     def _check_existence(self, x, y):
         query = "MATCH (node:Figure {x: %f, y: %f} RETURN node)" % (x, y)
         nodes = self._executor.execute_getting(query, checkExistence=True)
-        if None != nodes:
+        if nodes is not None:
             return True
         else:
             return False
