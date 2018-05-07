@@ -75,5 +75,25 @@ class ParserTest(unittest.TestCase):
         self.assertTrue('14' == relations[2][0])
         self.assertTrue('red' == relations[2][1])
 
+    def testMatchWithRelation4(self):
+        query = "MATCH (node1:Figure {x: 10, y: 19})<-[:LEFT {x: 14}]-(node2:Figure) RETURN node2"
+        label, values, relations = self._parser.parse(query)
+        self.assertTrue("figure" == label)
+        self.assertTrue('10' == values[0])
+        self.assertTrue('19' == values[1])
+        self.assertTrue(-1 == relations[0])
+        self.assertTrue('left' == relations[1])
+        self.assertTrue('14' == relations[2][0])
+    
+    def testMatchWithRelation5(self):
+        query = "MATCH (node1:Figure {x: 10, y: 19})-[:LEFT {x: 14}]-(node2:Figure) RETURN node2"
+        label, values, relations = self._parser.parse(query)
+        self.assertTrue("figure" == label)
+        self.assertTrue('10' == values[0])
+        self.assertTrue('19' == values[1])
+        self.assertTrue(0 == relations[0])
+        self.assertTrue('left' == relations[1])
+        self.assertTrue('14' == relations[2][0])
+
 if __name__ == "__main__":
     unittest.main() # run all tests
