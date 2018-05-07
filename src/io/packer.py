@@ -18,27 +18,27 @@ class Packer:
         first_node = relation.first_node.id
         second_node = relation.second_node.id
         type = True
-        if relation.first_prev_rel == cfg.INV_ID:
+        if (relation.first_prev_rel == cfg.INV_ID) or (relation.first_prev_rel is None):
             first_prev_relation = cfg.INV_ID
         else:
             first_prev_relation = relation.first_prev_rel.id
 
-        if relation.second_prev_rel == cfg.INV_ID:
+        if (relation.second_prev_rel == cfg.INV_ID) or (relation.second_prev_rel is None):
             second_prev_relation = cfg.INV_ID
         else:
             second_prev_relation = relation.second_prev_rel.id
 
-        if relation.first_next_rel == cfg.INV_ID:
+        if (relation.first_next_rel == cfg.INV_ID) or (relation.first_next_rel is None):
             first_next_relation = cfg.INV_ID
         else:
             first_next_relation = relation.first_next_rel.id
 
-        if relation.second_next_rel == cfg.INV_ID:
+        if (relation.second_next_rel == cfg.INV_ID) or (relation.second_next_rel is None):
             second_next_realtion = cfg.INV_ID
         else:
             second_next_realtion = relation.second_next_rel.id
 
-        if relation.next_prop == cfg.INV_ID:
+        if (relation.next_prop == cfg.INV_ID) or (relation.next_prop is None):
             property = cfg.INV_ID
         else:
             property = relation.next_prop.id
@@ -62,18 +62,17 @@ class Packer:
         :return:
         """
         label = node.label.id
-        if node.next_prop == cfg.INV_ID:
+        if (node.next_prop == cfg.INV_ID) or (node.next_prop is None):
             property = cfg.INV_ID
         else:
             property = node.next_prop.id
 
-        if node.next_rel == cfg.INV_ID:
+        if (node.next_rel == cfg.INV_ID)  or (node.next_rel is None):
             relation = cfg.INV_ID
         elif type(node.next_rel) == Relationship:
             relation = node.next_rel.id
         else:
             relation = node.next_rel
-
         return struct.pack("? i i i",in_use,label,property,relation)
 
     def pack_property_inline(property: Property, in_use=True) -> bytes:
@@ -82,8 +81,8 @@ class Packer:
         :return:
         """
         key = property.label.id
-        if(property.next_prop == cfg.INV_ID):
-            next = property.next_prop
+        if(property.next_prop == cfg.INV_ID) or (property.next_prop == None):
+            next = cfg.INV_ID
         else:
             next = property.next_prop.id
         if property.type == PropertyType.FLOAT:
@@ -107,8 +106,8 @@ class Packer:
         :return:
         """
         key = property.label.id
-        if(property.next_prop == cfg.INV_ID):
-            next = property.next_prop
+        if(property.next_prop == cfg.INV_ID) or (property.next_prop is None):
+            next = cfg.INV_ID
         else:
             next = property.next_prop.id
         return struct.pack("? i i i i", in_use, property.type.value, key, value_pointer, next)
