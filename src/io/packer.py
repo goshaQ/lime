@@ -6,7 +6,7 @@ from src.engine.node import Node
 from src.engine.property import Property
 from src.engine.property_type import PropertyType
 from src.engine.relationship import Relationship
-import src.config as config
+
 
 class Packer:
 
@@ -18,28 +18,28 @@ class Packer:
         first_node = relation.first_node.id
         second_node = relation.second_node.id
         type = True
-        if relation.first_prev_rel == config.INV_ID:
-            first_prev_relation = config.INV_ID
+        if relation.first_prev_rel == cfg.INV_ID:
+            first_prev_relation = cfg.INV_ID
         else:
             first_prev_relation = relation.first_prev_rel.id
 
-        if relation.second_prev_rel == config.INV_ID:
-            second_prev_relation = config.INV_ID
+        if relation.second_prev_rel == cfg.INV_ID:
+            second_prev_relation = cfg.INV_ID
         else:
             second_prev_relation = relation.second_prev_rel.id
 
-        if relation.first_next_rel == config.INV_ID:
-            first_next_relation = config.INV_ID
+        if relation.first_next_rel == cfg.INV_ID:
+            first_next_relation = cfg.INV_ID
         else:
             first_next_relation = relation.first_next_rel.id
 
-        if relation.second_next_rel == config.INV_ID:
-            second_next_realtion = config.INV_ID
+        if relation.second_next_rel == cfg.INV_ID:
+            second_next_realtion = cfg.INV_ID
         else:
             second_next_realtion = relation.second_next_rel.id
 
-        if relation.next_prop == config.INV_ID:
-            property = config.INV_ID
+        if relation.next_prop == cfg.INV_ID:
+            property = cfg.INV_ID
         else:
             property = relation.next_prop.id
 
@@ -62,13 +62,13 @@ class Packer:
         :return:
         """
         label = node.label.id
-        if node.next_prop == config.INV_ID:
-            property = config.INV_ID
+        if node.next_prop == cfg.INV_ID:
+            property = cfg.INV_ID
         else:
             property = node.next_prop.id
 
-        if node.next_rel == config.INV_ID:
-            relation = config.INV_ID
+        if node.next_rel == cfg.INV_ID:
+            relation = cfg.INV_ID
         elif type(node.next_rel) == Relationship:
             relation = node.next_rel.id
         else:
@@ -82,7 +82,7 @@ class Packer:
         :return:
         """
         key = property.label.id
-        if(property.next_prop == config.INV_ID):
+        if(property.next_prop == cfg.INV_ID):
             next = property.next_prop
         else:
             next = property.next_prop.id
@@ -107,7 +107,7 @@ class Packer:
         :return:
         """
         key = property.label.id
-        if(property.next_prop == config.INV_ID):
+        if(property.next_prop == cfg.INV_ID):
             next = property.next_prop
         else:
             next = property.next_prop.id

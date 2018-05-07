@@ -1,9 +1,9 @@
 import config as cfg
 
-from engine.node import Node
-from engine.relationship import Relationship
+from src.engine.node import Node
+from src.engine.relationship import Relationship
 
-from io.io import Io
+from src.io.io import Io
 
 
 class GraphEngine:
@@ -49,7 +49,7 @@ class GraphEngine:
 
         # Before write to the storage dedupe the labels
         label = self._dedupe_label(label)
-        next_prop = self._dedupe_next_prop(next_prop)
+        next_prop = self._dedupe_next_prop(next_prop) if next_prop is not None else None
 
         created_node = self._io.write_node(Node(cfg.INV_ID, label, next_prop))
         label, next_prop = created_node.label, created_node.next_prop
@@ -80,7 +80,7 @@ class GraphEngine:
         label, next_prop, direction = relationship
 
         label = self._dedupe_label(label)
-        next_prop = self._dedupe_next_prop(next_prop)
+        next_prop = self._dedupe_next_prop(next_prop) if next_prop is not None else None
 
         is_directed = 0
         if direction == 1:
@@ -237,7 +237,7 @@ class GraphEngine:
 
         label, next_prop, direction = relationship
         label = self._dedupe_label(label)
-        next_prop = self._dedupe_next_prop(next_prop)
+        next_prop = self._dedupe_next_prop(next_prop) if next_prop is not None else None
         rel_properties = self._unroll_next_prop(next_prop)
 
         is_directed = 0
@@ -261,8 +261,8 @@ class GraphEngine:
             second_label, second_next_prop = second_node
 
             second_label = self._dedupe_label(second_label)
-            second_next_prop = self._dedupe_next_prop(second_next_prop)
-            second_properties = self._unroll_next_prop(second_next_prop)
+            second_next_prop = self._dedupe_next_prop(second_next_prop) if second_next_prop is not None else None
+            second_properties = self._unroll_next_prop(second_next_prop) if second_next_prop is not None else dict()
         else:
             for second in second_node:
                 retrieved_second_node[second.id] = second
@@ -316,7 +316,7 @@ class GraphEngine:
         label, next_prop = node
 
         label = self._dedupe_label(label)
-        next_prop = self._dedupe_next_prop(next_prop)
+        next_prop = self._dedupe_next_prop(next_prop) if next_prop is not None else None
 
         nodes_to_retrieve = set()
 
