@@ -83,7 +83,6 @@ class Io:
         node.label = self.write_label(node.label)
         if (node.next_prop != cfg.INV_ID) and (node.next_prop != None):
             node.next_prop = self.write_property(node.next_prop)
-        print(node.next_prop)
         value = Packer.pack_node(node)
         self._write_bytes(self.nodes,node.id*cfg.NODE_SIZE,value)
 
@@ -109,7 +108,7 @@ class Io:
         """
         if property.id == cfg.INV_ID:
             property.id = self._get_property_id()
-        if property.next_prop != cfg.INV_ID:
+        if (property.next_prop!=cfg.INV_ID) and not (property.next_prop is None):
             property.next_prop = self.write_property(property.next_prop)
 
         if property.type.value == PropertyType.STRING.value:
@@ -132,20 +131,20 @@ class Io:
         if relation.id == cfg.INV_ID:
             relation.id = self._get_relation_id()
         value = Packer.pack_relation(relation)
-        label = self.write_label(relation.label)
-        if relation.next_prop != cfg.INV_ID:
-            property = self.write_property(relation.next_prop)
-        if relation.first_node != cfg.INV_ID:
+        relation.label = self.write_label(relation.label)
+        if (relation.next_prop != cfg.INV_ID) and (relation.next_prop is not None):
+            relation.next_prop = self.write_property(relation.next_prop)
+        if (relation.first_node != cfg.INV_ID) and (relation.first_node is not None):
             first_node = self.read_node(relation.first_node.id)
-            if first_node.next_rel == cfg.INV_ID:
+            if (first_node.next_rel == cfg.INV_ID) or (first_node.next_rel is None):
                 first_node.next_rel = relation.id
                 self.write_node(first_node)
             else:
                 self._update_next_rel(first_node, relation)
 
-        if relation.second_node != cfg.INV_ID:
+        if (relation.second_node != cfg.INV_ID) and (relation.second_node is not None):
             second_node = self.read_node(relation.second_node.id)
-            if second_node.next_rel == cfg.INV_ID:
+            if (second_node.next_rel == cfg.INV_ID) or (second_node.next_rel is None):
                 second_node.next_rel = relation.id
                 self.write_node(second_node)
             else:
@@ -160,12 +159,14 @@ class Io:
             next_rel = next_relation.first_next_rel
         if next_relation.second_node == node.id:
             next_rel = next_relation.second_next_rel
-        while (next_rel != cfg.INV_ID):
+
+        while (next_rel != cfg.INV_ID) and (next_rel is not None):
             next_relation = self.read_relation(next_rel)
             if next_relation.first_node == node.id:
                 next_rel = next_relation.first_next_rel
             if next_relation.second_node == node.id:
                 next_rel = next_relation.second_next_rel
+
         if next_relation.first_node == node.id:
             next_relation.first_next_rel = relation.id
             self.write_relation(next_relation)

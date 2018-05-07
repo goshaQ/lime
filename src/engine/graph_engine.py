@@ -1,4 +1,4 @@
-import config as cfg
+import src.config as cfg
 
 from src.engine.node import Node
 from src.engine.relationship import Relationship
@@ -57,6 +57,7 @@ class GraphEngine:
         # Add new labels to the corresponding cache
         self._lb_cache[label.value] = label
         while next_prop is not None:
+            print(next_prop)
             self._lb_cache[next_prop.label] = next_prop.label
             next_prop = next_prop.next_prop
 

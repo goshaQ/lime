@@ -1,4 +1,4 @@
-import config as cfg
+import src.config as cfg
 import unittest
 
 from src.engine.label import Label
@@ -41,7 +41,7 @@ class TestIO(unittest.TestCase):
         value = "I LOVE ADB"
         label = Label(cfg.INV_ID, value)
         label = io.write_label(label)
-        property = Property(cfg.INV_ID, PropertyType.STRING, label, value, cfg.INV_ID)
+        property = Property(cfg.INV_ID, PropertyType.STRING, label, value, None)
         written = io.write_property(property)
         retrieved = io.read_property(written.id)
         self.assertEqual(property.id,retrieved.id)
@@ -56,7 +56,7 @@ class TestIO(unittest.TestCase):
         prop_value = True
         label = Label(cfg.INV_ID, value)
         label = io.write_label(label)
-        property = Property(cfg.INV_ID, PropertyType.BOOL, label, prop_value, cfg.INV_ID)
+        property = Property(cfg.INV_ID, PropertyType.BOOL, label, prop_value, None)
         written = io.write_property(property)
         retrieved = io.read_property(written.id)
         self.assertEqual(property.id,retrieved.id)
@@ -71,7 +71,7 @@ class TestIO(unittest.TestCase):
         prop_value = 0.5
         label = Label(cfg.INV_ID, value)
         label = io.write_label(label)
-        property = Property(cfg.INV_ID, PropertyType.FLOAT, label, prop_value, cfg.INV_ID)
+        property = Property(cfg.INV_ID, PropertyType.FLOAT, label, prop_value, None)
         written = io.write_property(property)
         retrieved = io.read_property(written.id)
         self.assertEqual(property.id,retrieved.id)
@@ -86,7 +86,7 @@ class TestIO(unittest.TestCase):
         prop_value = 1
         label = Label(cfg.INV_ID, value)
         label = io.write_label(label)
-        property = Property(cfg.INV_ID, PropertyType.INT, label, prop_value, cfg.INV_ID)
+        property = Property(cfg.INV_ID, PropertyType.INT, label, prop_value,None)
         written = io.write_property(property)
         retrieved = io.read_property(written.id)
         self.assertEqual(property.id,retrieved.id)
@@ -100,7 +100,7 @@ class TestIO(unittest.TestCase):
         value = "Graph DB is AWESOME"
         label = Label(cfg.INV_ID, value)
         prop_value = True
-        property = Property(cfg.INV_ID, PropertyType.BOOL, label, prop_value, cfg.INV_ID)
+        property = Property(cfg.INV_ID, PropertyType.BOOL, label, prop_value, None)
         property = io.write_property(property)
         label = io.write_label(label)
         node = Node(cfg.INV_ID, label, property, cfg.INV_ID)
@@ -117,15 +117,19 @@ class TestIO(unittest.TestCase):
         label = Label(cfg.INV_ID, value)
         label = io.write_label(label)
         prop_value = True
-        property = Property(cfg.INV_ID, PropertyType.BOOL, label, prop_value, cfg.INV_ID)
+        property = Property(cfg.INV_ID, PropertyType.BOOL, label, prop_value, None)
         property = io.write_property(property)
-        node = Node(cfg.INV_ID, label, property, cfg.INV_ID)
-        node2 = Node(cfg.INV_ID, label, property, cfg.INV_ID)
+        node = Node(cfg.INV_ID, label, property, None)
+        node2 = Node(cfg.INV_ID, label, property, None)
         written1 = io.write_node(node)
         written2 = io.write_node(node2)
-        relation = Relationship(cfg.INV_ID, False, written1, written2, label, property, cfg.INV_ID, cfg.INV_ID, cfg.INV_ID, cfg.INV_ID)
+        relation = Relationship(cfg.INV_ID, False, written1, written2, label, property, None, None, None, None)
         written = io.write_relation(relation)
         retrieved = io.read_relation(written.id)
+
+        written1 = io.read_node(written1.id)
+        written2 = io.read_node(written2.id)
+
         self.assertEqual(retrieved.label.value,value)
         self.assertEqual(retrieved.next_prop.value,prop_value)
         self.assertEqual(retrieved.first_node.id,written1.id)
