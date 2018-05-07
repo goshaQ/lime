@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class PropertyType(Enum):
     BOOL = 1
     BYTE = 2
