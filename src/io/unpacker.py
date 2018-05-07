@@ -1,5 +1,5 @@
 import struct
-import src.io.config as cfg
+import src.config as cfg
 
 from src.engine.label import Label
 from src.engine.node import Node

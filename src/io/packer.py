@@ -1,5 +1,5 @@
 import struct
-import src.io.config as cfg
+import src.config as cfg
 
 from src.engine.label import Label
 from src.engine.node import Node
@@ -69,8 +69,10 @@ class Packer:
 
         if node.next_rel == config.INV_ID:
             relation = config.INV_ID
-        else:
+        elif type(node.next_rel) == Relationship:
             relation = node.next_rel.id
+        else:
+            relation = node.next_rel
 
         return struct.pack("? i i i",in_use,label,property,relation)
 

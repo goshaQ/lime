@@ -9,8 +9,8 @@ from src.io.io import Io
 import unittest
 import src.config as config
 
-class TestIO(unittest.TestCase):
 
+class TestIO(unittest.TestCase):
     def test_store_io(self):
         io = Io()
         store = "ADB is THE BEST COURSE"
@@ -106,7 +106,7 @@ class TestIO(unittest.TestCase):
         written = io.write_node(node)
         retrived = io.read_node(written.id)
         self.assertEqual(node.id,retrived.id)
-        self.assertEqual(node.next_prop.id,retrived.next_prop)
+        self.assertEqual(node.next_prop.id,retrived.next_prop.id)
         self.assertEqual(node.label.value,retrived.label.value)
         self.assertEqual(node.label.id,retrived.label.id)
 
@@ -126,9 +126,9 @@ class TestIO(unittest.TestCase):
         written = io.write_relation(relation)
         retrieved = io.read_relation(written.id)
         self.assertEqual(retrieved.label.value,value)
-        self.assertEqual(io.read_property(retrieved.next_prop).value,prop_value)
-        self.assertEqual(io.read_node(retrieved.first_node).id,written1.id)
-        self.assertEqual(io.read_node(retrieved.second_node).id,written2.id)
+        self.assertEqual(retrieved.next_prop.value,prop_value)
+        self.assertEqual(retrieved.first_node.id,written1.id)
+        self.assertEqual(retrieved.second_node.id,written2.id)
 
     def test_get_nodes_io(self):
         io = Io()
@@ -146,5 +146,4 @@ class TestIO(unittest.TestCase):
             self.assertEqual(node.label.value,"Macarena")
 
 if __name__ == '__main__':
-
     unittest.main()
