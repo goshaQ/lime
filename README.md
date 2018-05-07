@@ -18,6 +18,23 @@ Additionally install [libspatialindex](http://libspatialindex.github.io/index.ht
 python3 cli.py
 ```
 
+## Running tests
+```
+cd lime/tests/
+
+python3 run_tests.py
+```
+
+## Built with
+- [Python 3.6](https://www.python.org/downloads/release/python-360/)
+### Data API
+
+### Graph Engine
+- [Rtree 0.8.3](https://pypi.org/project/Rtree/)
+- [libspatialindex](http://libspatialindex.github.io/index.html)
+
+### Filesystem
+
 ## Work process
 After running the `cli.py` two threads are created:
 - Reading the data from UDP:
@@ -156,23 +173,6 @@ RETURN node2
 MATCH (node1:Figure {x: 10, y: 19})-[:LEFT {x: 14, color: red}]-(node2:Figure) 
 RETURN node2
 ```
-
-## Running the tests
-```
-cd lime/tests/
-
-python3 run_tests.py
-```
-
-## Built with
-- [Python 3.6](https://www.python.org/downloads/release/python-360/)
-### Data API
-
-### Graph Engine
-- [Rtree 0.8.3](https://pypi.org/project/Rtree/)
-- [libspatialindex](http://libspatialindex.github.io/index.html)
-
-### Filesystem
 
 ## Screenshots
 
