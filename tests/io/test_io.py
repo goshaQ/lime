@@ -82,18 +82,26 @@ class TestIO(unittest.TestCase):
 
     def test_int_property_io(self):
         io = Io()
-        value = "I LOVE ADB"
+        value3 = "I LOVE ADB3"
+        value2 = "I LOVE ADB2"
+        value1 = "I LOVE ADB1"
+
         prop_value = 1
-        label = Label(cfg.INV_ID, value)
-        label = io.write_label(label)
-        property = Property(cfg.INV_ID, PropertyType.INT, label, prop_value,None)
-        written = io.write_property(property)
+        label3 = Label(cfg.INV_ID, value3)
+        label2 = Label(cfg.INV_ID, value2)
+        label1 = Label(cfg.INV_ID, value1)
+
+        property = Property(cfg.INV_ID, PropertyType.INT, label1, 1,None)
+        property2 = Property(cfg.INV_ID, PropertyType.INT, label2, 2,property)
+        property3 = Property(cfg.INV_ID, PropertyType.INT, label3, 3,property2)
+
+        written = io.write_property(property3)
         retrieved = io.read_property(written.id)
-        self.assertEqual(property.id,retrieved.id)
-        self.assertEqual(property.value,retrieved.value)
-        self.assertEqual(property.type.value,retrieved.type.value)
-        self.assertEqual(property.label.value,retrieved.label.value)
-        self.assertEqual(property.next_prop,retrieved.next_prop)
+        self.assertEqual(property3.id,retrieved.id)
+        self.assertEqual(property3.value,retrieved.value)
+        self.assertEqual(property3.type.value,retrieved.type.value)
+        self.assertEqual(property3.label.value,retrieved.label.value)
+        self.assertEqual(property3.next_prop.id,retrieved.next_prop.id)
 
     def test_node_io(self):
         io = Io()
@@ -101,8 +109,6 @@ class TestIO(unittest.TestCase):
         label = Label(cfg.INV_ID, value)
         prop_value = True
         property = Property(cfg.INV_ID, PropertyType.BOOL, label, prop_value, None)
-        property = io.write_property(property)
-        label = io.write_label(label)
         node = Node(cfg.INV_ID, label, property, cfg.INV_ID)
         written = io.write_node(node)
         retrived = io.read_node(written.id)
