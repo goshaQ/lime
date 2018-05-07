@@ -79,12 +79,14 @@ class Io:
         """
         if node.next_prop == None:
             node.next_prop = cfg.INV_ID
+        if node.next_rel == None:
+            node.next_rel = cfg.INV_ID
         if node.id == cfg.INV_ID:
             node.id = self._get_node_id()
-        value = Packer.pack_node(node)
         node.label = self.write_label(node.label)
         if node.next_prop != cfg.INV_ID:
             node.next_prop = self.write_property(node.next_prop)
+        value = Packer.pack_node(node)
         self._write_bytes(self.nodes,node.id*cfg.NODE_SIZE,value)
         return node
 
@@ -210,6 +212,8 @@ class Io:
             label = self.read_label(label_id)
             if property != cfg.INV_ID:
                 property = self.read_property(property)
+            else:
+                property = None
             return Node(id,label,property,relation_id)
         else:
             return cfg.INV_ID
@@ -251,8 +255,13 @@ class Io:
         if in_use:
             if label != cfg.INV_ID:
                 label = self.read_label(label)
+            else:
+                label = None
             if next_property != cfg.INV_ID:
                 next_property = self.read_property(next_property)
+            else:
+                next_property = None
+
             return Property(id,PropertyType(type),label,value,next_property)
         else:
             return cfg.INV_ID
