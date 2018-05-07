@@ -178,6 +178,9 @@ RETURN node2
 ```
 
 ## Screenshots
+Data access API:
+
+![alt text](https://github.com/goshaQ/lime/blob/master/pics/dataAPI.png?raw=true "Data access API")
 
 ## Authors
 - Gosha Emelyanov - [goshaQ](https://github.com/goshaQ)
