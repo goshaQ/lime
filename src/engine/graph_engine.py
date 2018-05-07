@@ -1,6 +1,9 @@
 import config as cfg
+
 from engine.node import Node
 from engine.relationship import Relationship
+
+from io.io import Io
 
 
 class GraphEngine:
@@ -17,13 +20,26 @@ class GraphEngine:
     """
 
     def __init__(self):
-        # TODO: Implement
-        self._lb_cache = dict()
+        self._io = Io()
+        self._lb_cache = self._init_lb_cache()
         self._index = dict()
+
+    def _init_lb_cache(self):
+        """
+        Initializes the label cache.
+        
+        :return: Dictionary which has the following format:
+            {'label.value': 'label'}.
+        """
+
+        lb_cache = dict()
+        for label in self._io.get_labels_by_id(set()):
+            lb_cache[label.value] = label
+        return lb_cache
 
     def create_node(self, node):
         """
-        Creates a new node.
+        Creates the new node.
         
         :param node: A pair (<label>, <properties>) corresponding to a node.
         :return: Void
@@ -35,8 +51,7 @@ class GraphEngine:
         label = self._dedupe_label(label)
         next_prop = self._dedupe_next_prop(next_prop)
 
-        # TODO: Insert into the persistent storage
-        created_node = Node(cfg.INV_ID, label, next_prop)  #
+        created_node = self._io.write_node(Node(cfg.INV_ID, label, next_prop))
         label, next_prop = created_node.label, created_node.next_prop
 
         # Add new labels to the corresponding cache
@@ -311,8 +326,7 @@ class GraphEngine:
             key, value = lookup.popitem()
             nodes_to_retrieve = self._index[label.id][key][value]
 
-        # TODO: Retrieve nodes from the persistent storage
-        retrieved_nodes = list()  #
+        retrieved_nodes = self._io.get_nodes_by_id(nodes_to_retrieve)
 
         # Filter the retrieved nodes
         node_properties = self._unroll_next_prop(next_prop)
