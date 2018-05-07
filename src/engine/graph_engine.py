@@ -49,7 +49,7 @@ class GraphEngine:
 
         # Before write to the storage dedupe the labels
         label = self._dedupe_label(label)
-        next_prop = self._dedupe_next_prop(next_prop) if next_prop is not None else None
+        next_prop = self._dedupe_next_prop(next_prop)
 
         created_node = self._io.write_node(Node(cfg.INV_ID, label, next_prop))
         label, next_prop = created_node.label, created_node.next_prop
@@ -80,7 +80,7 @@ class GraphEngine:
         label, next_prop, direction = relationship
 
         label = self._dedupe_label(label)
-        next_prop = self._dedupe_next_prop(next_prop) if next_prop is not None else None
+        next_prop = self._dedupe_next_prop(next_prop)
 
         is_directed = 0
         if direction == 1:
@@ -103,9 +103,9 @@ class GraphEngine:
                     while second_prev_rel.next_rel is not None:
                         second_prev_rel = second_prev_rel.next_rel
 
-                # TODO: Insert into the persistent storage
-                created_relationship = Relationship(cfg.INV_ID, is_directed, first, second, label, next_prop,
-                                                    first_prev_rel, None, second_prev_rel, None)  #
+                created_relationship = self._io.write_relation(
+                    Relationship(cfg.INV_ID, is_directed, first, second, label, next_prop,
+                                 first_prev_rel, None, second_prev_rel, None))
                 label, next_prop = created_relationship.label, created_relationship.next_prop
 
                 # Add new labels to the corresponding cache
@@ -154,7 +154,8 @@ class GraphEngine:
         """
 
         retrieved_node = self._retrieve_node(node)
-        # TODO: Remove from the persistent storage
+        for ind_node in retrieved_node:
+            self._io.del_node(ind_node.id)
 
     def delete_relationship(self, first_node, second_node, relationship):
         """
@@ -167,7 +168,8 @@ class GraphEngine:
         """
 
         retrieved_relationship = self._retrieve_relationship(first_node, second_node, relationship)
-        # TODO: Remove from the persistent storage
+        for ind_relationship_id in [relationship_id for _, _, relationship_id in retrieved_relationship]:
+            self._io.del_relation(ind_relationship_id)
 
     def match_pattern(self, nodes, relationships):
         """
@@ -237,7 +239,7 @@ class GraphEngine:
 
         label, next_prop, direction = relationship
         label = self._dedupe_label(label)
-        next_prop = self._dedupe_next_prop(next_prop) if next_prop is not None else None
+        next_prop = self._dedupe_next_prop(next_prop)
         rel_properties = self._unroll_next_prop(next_prop)
 
         is_directed = 0
@@ -261,8 +263,8 @@ class GraphEngine:
             second_label, second_next_prop = second_node
 
             second_label = self._dedupe_label(second_label)
-            second_next_prop = self._dedupe_next_prop(second_next_prop) if second_next_prop is not None else None
-            second_properties = self._unroll_next_prop(second_next_prop) if second_next_prop is not None else dict()
+            second_next_prop = self._dedupe_next_prop(second_next_prop)
+            second_properties = self._unroll_next_prop(second_next_prop)
         else:
             for second in second_node:
                 retrieved_second_node[second.id] = second
@@ -272,8 +274,7 @@ class GraphEngine:
             first_next_rel = first.next_rel
             while first_next_rel is not None:
                 if type(first_next_rel) is not Relationship:
-                    # TODO: retrieve the relationship from the persistent storage
-                    first_next_rel = Relationship()  #
+                    first_next_rel = self._io.read_relation(first_next_rel)
 
                 appropriate = first_next_rel.label.id == label.id
                 appropriate = appropriate and ((is_directed and
@@ -291,8 +292,7 @@ class GraphEngine:
                         if first_next_rel.second_node in retrieved_second_node:
                             second = retrieved_second_node[first_next_rel.second_node]
                     else:
-                        # TODO: retrieve the node from the persistent storage
-                        second = Node()  #
+                        second = self._io.read_node(first_next_rel.second_node)
                         retrieved_second_properties = self._unroll_next_prop(second.next_prop)
 
                         if second.label.id != second_label.id or (not (second_next_prop is None or
@@ -316,7 +316,7 @@ class GraphEngine:
         label, next_prop = node
 
         label = self._dedupe_label(label)
-        next_prop = self._dedupe_next_prop(next_prop) if next_prop is not None else None
+        next_prop = self._dedupe_next_prop(next_prop)
 
         nodes_to_retrieve = set()
 
