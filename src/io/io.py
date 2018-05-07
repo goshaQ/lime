@@ -37,7 +37,7 @@ class Io:
         result = []
         for id in nodes:
             node = self.read_node(id)
-            if node != cfg.INV_ID:
+            if node != None:
                 result.append(node)
         return result
 
@@ -52,7 +52,7 @@ class Io:
         result = []
         for id in labels:
             label = self.read_label(id)
-            if label != cfg.INV_ID:
+            if label != None:
                 result.append(label)
         return result
 
@@ -67,7 +67,7 @@ class Io:
         result = []
         for id in relations:
             relation = self.read_relation(id)
-            if relation != cfg.INV_ID:
+            if relation != None:
                 result.append(relation)
         return result
 
@@ -77,17 +77,17 @@ class Io:
         :param node to pack:
         :return: byte represenation of string
         """
-        if node.next_prop == None:
-            node.next_prop = cfg.INV_ID
-        if node.next_rel == None:
-            node.next_rel = cfg.INV_ID
+
         if node.id == cfg.INV_ID:
             node.id = self._get_node_id()
         node.label = self.write_label(node.label)
-        if node.next_prop != cfg.INV_ID:
+        if (node.next_prop != cfg.INV_ID) and (node.next_prop != None):
             node.next_prop = self.write_property(node.next_prop)
+        print(node.next_prop)
         value = Packer.pack_node(node)
         self._write_bytes(self.nodes,node.id*cfg.NODE_SIZE,value)
+
+
         return node
 
     def write_label(self,label: Label) -> Label:
@@ -109,11 +109,15 @@ class Io:
         """
         if property.id == cfg.INV_ID:
             property.id = self._get_property_id()
+        if property.next_prop != cfg.INV_ID:
+            property.next_prop = self.write_property(property.next_prop)
+
         if property.type.value == PropertyType.STRING.value:
             store_pointer = self.write_store(property.value)
             value = Packer.pack_property_store(store_pointer,property)
         else:
             value = Packer.pack_property_inline(property)
+
         self._write_bytes(self.properties,property.id*cfg.PROPERTY_SIZE,value)
         return property
 
@@ -216,7 +220,7 @@ class Io:
                 property = None
             return Node(id,label,property,relation_id)
         else:
-            return cfg.INV_ID
+            return None
 
     def read_label(self, id) -> Label:
         """
@@ -234,7 +238,7 @@ class Io:
             value = self.read_store(store_id)
             return Label(id,value)
         else:
-            return cfg.INV_ID
+            return None
 
     def read_property(self, id: int) -> Property:
         """
@@ -261,10 +265,9 @@ class Io:
                 next_property = self.read_property(next_property)
             else:
                 next_property = None
-
             return Property(id,PropertyType(type),label,value,next_property)
         else:
-            return cfg.INV_ID
+            return None
 
     def read_relation(self, id) -> Relationship:
         """

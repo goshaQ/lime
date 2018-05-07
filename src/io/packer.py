@@ -62,18 +62,17 @@ class Packer:
         :return:
         """
         label = node.label.id
-        if node.next_prop == cfg.INV_ID:
+        if (node.next_prop == cfg.INV_ID) or (node.next_prop is None):
             property = cfg.INV_ID
         else:
             property = node.next_prop.id
 
-        if node.next_rel == cfg.INV_ID:
+        if (node.next_rel == cfg.INV_ID)  or (node.next_rel is None):
             relation = cfg.INV_ID
         elif type(node.next_rel) == Relationship:
             relation = node.next_rel.id
         else:
             relation = node.next_rel
-
         return struct.pack("? i i i",in_use,label,property,relation)
 
     def pack_property_inline(property: Property, in_use=True) -> bytes:
@@ -82,8 +81,8 @@ class Packer:
         :return:
         """
         key = property.label.id
-        if(property.next_prop == cfg.INV_ID):
-            next = property.next_prop
+        if(property.next_prop == cfg.INV_ID) or (property.next_prop == None):
+            next = cfg.INV_ID
         else:
             next = property.next_prop.id
         if property.type == PropertyType.FLOAT:
