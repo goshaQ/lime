@@ -74,36 +74,50 @@ class Executor():
             assert(len(data) == len(properties))
             return self._engine.match_pattern((label, properties), relationships=None)
         else:
-            node_label, node_values, relations = self._parser.parse(query)
-            node_label = Label(self._id, node_label)
-            properties = []
-            for p in node_values:
-                v = Property(self._id, PropertyType.STRING, node_label, p, None)
-                properties.append(v)
-            # for i in range(len(properties) - 2):
-            #     properties[i].next_prop(properties[i+1]) 
-            properties[0].next_prop = properties[1]
-            assert(len(node_values) == len(properties))
-            nodes = [(node_label, properties)]
-            relationships = []
-            if len(relations) > 2:
-                direction = relations[0]
-                label = Label(self._id, relations[1])
+            if "[:" in query:
+                node_label, node_values, relations = self._parser.parse(query)
+                node_label = Label(self._id, node_label)
                 properties = []
-                for p in relations[2]:
-                    v = Property(self._id, PropertyType.STRING, label, p, None)
+                for p in node_values:
+                    v = Property(self._id, PropertyType.STRING, node_label, p, None)
                     properties.append(v)
                 # for i in range(len(properties) - 2):
-                #     properties[i].next_prop = properties[i+1]
+                #     properties[i].next_prop(properties[i+1]) 
                 properties[0].next_prop = properties[1]
-                assert(len(relations[2]) == len(properties))
-                relationships.append((label, properties, direction))
-            else:
-                direction = relations[0]
-                label = Label(self._id, relations[1])
-                relationships.append((label, None, direction))
+                assert(len(node_values) == len(properties))
+                nodes = [(node_label, properties)]
+                relationships = []
+                if len(relations) > 2:
+                    direction = relations[0]
+                    label = Label(self._id, relations[1])
+                    properties = []
+                    for p in relations[2]:
+                        v = Property(self._id, PropertyType.STRING, label, p, None)
+                        properties.append(v)
+                    # for i in range(len(properties) - 2):
+                    #     properties[i].next_prop = properties[i+1]
+                    properties[0].next_prop = properties[1]
+                    assert(len(relations[2]) == len(properties))
+                    relationships.append((label, properties, direction))
+                else:
+                    direction = relations[0]
+                    label = Label(self._id, relations[1])
+                    relationships.append((label, None, direction))
 
-            self._engine.match_pattern(nodes, relationships)
+                self._engine.match_pattern(nodes, relationships)
+            else:
+                node_label, node_values = self._parser.parse(query)
+                node_label = Label(self._id, node_label)
+                properties = []
+                for p in node_values:
+                    v = Property(self._id, PropertyType.STRING, node_label, p, None)
+                    properties.append(v)
+                # for i in range(len(properties) - 2):
+                #     properties[i].next_prop(properties[i+1])
+                if len(properties) > 1: 
+                    properties[0].next_prop = properties[1]
+                assert(len(node_values) == len(properties))
+                nodes = [(node_label, properties)]
 
     def execute_removing(self, query):
         label, values = self._parser.parse(query)

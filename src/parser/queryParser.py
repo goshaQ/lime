@@ -45,6 +45,9 @@ class Parser():
             
     
     def _create_clause(self, tokens, query):
+        """
+        CREATE (node:Figure {x: 10, y: 15}) RETURN node
+        """
         self._check_create(query)
         label = tokens[1].replace('(', '').split(':', 1)[1]
         properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
@@ -62,6 +65,9 @@ class Parser():
         pass
 
     def _match_query(self, tokens, query):
+        """
+        MATCH (node:Figure {x: 10}) RETURN node
+        """
         self._check_match(query)
         if "[:" in query:
             return self._match_by_relations(query)
@@ -72,6 +78,8 @@ class Parser():
     def _match_by_relations(self, query):
         """
         A method for parsing query with relationships
+        MATCH (node:Figure {x: 10, y:15})-[:LEFT]->(node1:Figure) RETURN node1
+        MATCH (node:Figure {x:10, y:15})-[:LEFT {color: red}]->(node1:Figure) RETURN node1
 
         :return nodes, relationships: A tuples with nodes data and relations data
         """

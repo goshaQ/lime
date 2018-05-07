@@ -8,8 +8,7 @@ class Interface():
     def __init__(self):
         self._executor = Executor()
 
-    def add_index(self):
-        query = input("Enter query for index: ")
+    def add_index(self, query):
         self._executor.execute_indexing(query)
 
     def add_figures(self, data):
@@ -30,10 +29,8 @@ class Interface():
         else:
             return False
 
-    def get_figures(self):
-        query = input("Enter query: ")
+    def get_figures(self, query):
         return self._executor.execute_getting(query)
 
-    def remove_node(self):
-        query = input("Enter query: ")
+    def remove_node(self, query):
         self._executor.execute_removing(query)
