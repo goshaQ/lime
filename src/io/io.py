@@ -1,19 +1,16 @@
-import struct
-
-import _io
-import src.io.config as cfg
-from src.engine.label import Label
-
-from src.engine.node import Node
-from src.engine.property import Property
-from src.engine.property_type import PropertyType
-from src.engine.relationship import Relationship
-
-from src.io.packer import Packer
-from src.io.unpacker import Unpacker
-from src import config
-
 import os
+import _io
+import config as cfg
+
+from engine.label import Label
+from engine.node import Node
+from engine.property import Property
+from engine.property_type import PropertyType
+from engine.relationship import Relationship
+
+from io.packer import Packer
+from io.unpacker import Unpacker
+
 
 class Io:
 
@@ -40,7 +37,7 @@ class Io:
         result = []
         for id in nodes:
             node = self.read_node(id)
-            if node != config.INV_ID:
+            if node != cfg.INV_ID:
                 result.append(node)
         return result
 
@@ -55,7 +52,7 @@ class Io:
         result = []
         for id in labels:
             label = self.read_label(id)
-            if label != config.INV_ID:
+            if label != cfg.INV_ID:
                 result.append(label)
         return result
 
@@ -70,7 +67,7 @@ class Io:
         result = []
         for id in relations:
             relation = self.read_relation(id)
-            if relation != config.INV_ID:
+            if relation != cfg.INV_ID:
                 result.append(relation)
         return result
 
@@ -80,7 +77,7 @@ class Io:
         :param node to pack:
         :return: byte represenation of string
         """
-        if node.id == config.INV_ID:
+        if node.id == cfg.INV_ID:
             node.id = self._get_node_id()
         value = Packer.pack_node(node)
         node.label = self.write_label(node.label)
@@ -94,7 +91,7 @@ class Io:
         Writes property to file. Creates dynamic store if needed by property type. Inlines otherwise.
         :param property - property to write:
         """
-        if label.id == config.INV_ID:
+        if label.id == cfg.INV_ID:
             label.id = self._get_label_id()
         store_pointer = self.write_store(label.value)
         value = Packer.pack_label(store_pointer,label)
@@ -106,7 +103,7 @@ class Io:
         Writes property to file. Creates dynamic store if needed by property type. Inlines otherwise.
         :param property - property to write:
         """
-        if property.id == config.INV_ID:
+        if property.id == cfg.INV_ID:
             property.id = self._get_property_id()
         if property.type.value == PropertyType.STRING.value:
             store_pointer = self.write_store(property.value)
@@ -121,7 +118,7 @@ class Io:
         Writes relation to file.
         :param relation - relation written:
         """
-        if relation.id == config.INV_ID:
+        if relation.id == cfg.INV_ID:
             relation.id = self._get_relation_id()
         value = Packer.pack_relation(relation)
         label = self.write_label(relation.label)
@@ -143,7 +140,7 @@ class Io:
             value = value[23:]
             self._write_bytes(self.store,pointer,store)
             pointer = next_pointer
-        next_pointer = config.INV_ID
+        next_pointer = cfg.INV_ID
         store = Packer.pack_value(next_pointer, value[:24])
         self._write_bytes(self.store, pointer, store)
         return first_pointer
@@ -173,7 +170,7 @@ class Io:
             label = self.read_label(label_id)
             return Node(id,label,prop_id,relation_id)
         else:
-            return config.INV_ID
+            return cfg.INV_ID
 
     def read_label(self, id) -> Label:
         """
@@ -191,7 +188,7 @@ class Io:
             value = self.read_store(store_id)
             return Label(id,value)
         else:
-            return config.INV_ID
+            return cfg.INV_ID
 
     def read_property(self, id: int) -> Property:
         """
@@ -213,7 +210,7 @@ class Io:
             label = self.read_label(label_id)
             return Property(id,PropertyType(type),label,value,next_property_id)
         else:
-            return config.INV_ID
+            return cfg.INV_ID
 
     def read_relation(self, id) -> Relationship:
         """
@@ -232,7 +229,7 @@ class Io:
             return Relationship(id, type, first_node, second_node, label, property,
                                 first_prev_relation, first_next_relation, second_prev_relation, second_next_realtion)
         else:
-            return config.INV_ID
+            return cfg.INV_ID
 
     def read_store(self,id: int) -> str:
         """
@@ -260,7 +257,6 @@ class Io:
         file.seek(offset*size)
         return file.read(size)
 
-
     def del_node(self,id:int):
         """
         Delets node and all corresponding properties and relatins
@@ -272,7 +268,6 @@ class Io:
         self._write_bytes(self.nodes,id*cfg.NODE_SIZE,new_bytes)
         self.del_property(node.next_prop)
         self.del_relation(node.next_rel)
-
 
     def del_relation(self,id:int):
         relation = self.read_relation(id)
@@ -312,7 +307,6 @@ class Io:
         self._fix_node_rel(relation, node1)
         self._fix_node_rel(relation, node2)
 
-
     def _fix_node_rel(self,current: Relationship,node:Node):
         if node.id == current.first_node:
             if node.next_rel == current.id:
@@ -321,7 +315,6 @@ class Io:
             if node.next_rel == current.id:
                 node.next_rel = current.second_next_rel
         self.write_node(node)
-
 
     def _fix_next_rel(self,current: Relationship,next_rel: Relationship):
         """
@@ -404,7 +397,6 @@ class Io:
             self.del_store(id)
         new_bytes = Packer.pack_value(id,value,in_use=False)
         self._write_bytes(self.store,id*cfg.STORE_SIZE,new_bytes)
-
 
     def _get_label_id(self) -> int:
         """
