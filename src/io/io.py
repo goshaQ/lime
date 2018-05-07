@@ -125,10 +125,46 @@ class Io:
             relation.id = self._get_relation_id()
         value = Packer.pack_relation(relation)
         label = self.write_label(relation.label)
-        property = self.write_property(relation.next_prop)
+        if relation.next_prop != config.INV_ID:
+            property = self.write_property(relation.next_prop)
+        if relation.first_node != config.INV_ID:
+            first_node = self.read_node(relation.first_node)
+            if first_node.next_rel == config.INV_ID:
+                first_node.next_rel = relation.id
+                self.write_node(first_node)
+            else:
+                self._update_next_rel(first_node, relation)
+
+        if relation.second_node != config.INV_ID:
+            second_node = self.read_node(relation.second_node)
+            if second_node.next_rel == config.INV_ID:
+                second_node.next_rel = relation.id
+                self.write_node(second_node)
+            else:
+                self._update_next_rel(second_node, relation)
+
 
         self._write_bytes(self.relations,relation.id*cfg.RELATION_SIZE,value)
         return relation
+
+    def _update_next_rel(self,node: Node,relation: Relationship):
+        next_relation = self.read_relation(node.next_rel)
+        if next_relation.first_node == node.id:
+            next_rel = next_relation.first_next_rel
+        if next_relation.second_node == node.id:
+            next_rel = next_relation.second_next_rel
+        while (next_rel != config.INV_ID):
+            next_relation = self.read_relation(next_rel)
+            if next_relation.first_node == node.id:
+                next_rel = next_relation.first_next_rel
+            if next_relation.second_node == node.id:
+                next_rel = next_relation.second_next_rel
+        if next_relation.first_node == node.id:
+            next_relation.first_next_rel = relation.id
+            self.write_relation(next_relation)
+        if relation.second_node == node.id:
+            next_relation.second_next_rel = relation.id
+            self.write_relation(next_relation)
 
     def write_store(self,value :str) -> int:
         """
@@ -335,7 +371,7 @@ class Io:
         elif(current.second_node == next_rel.first_node):
             next_rel.first_prev_id = config.INV_ID
         prev_packed = Packer.pack_relation(next_rel)
-        self._write_bytes(self.relations, next_rel.id, prev_packed)
+        self._write_bytes(self.relations, next_rel.id*cfg.RELATION_SIZE, prev_packed)
 
     def _fix_prev_rel(self,current: Relationship,prev_rel: Relationship):
         """
@@ -349,7 +385,7 @@ class Io:
         elif(current.second_node == prev_rel.first_node):
             prev_rel.first_next_id = config.INV_ID
         prev_packed = Packer.pack_relation(prev_rel)
-        self._write_bytes(self.relations, prev_rel.id, prev_packed)
+        self._write_bytes(self.relations, prev_rel.id*cfg.RELATION_SIZE, prev_packed)
 
     def _swap_relation_pointer(self,next: Relationship, prev: Relationship):
         """
@@ -375,8 +411,8 @@ class Io:
 
         second_prev_rel_packed = Packer.pack_relation(prev)
         second_next_rel_packed = Packer.pack_relation(next)
-        self._write_bytes(self.relations, next.id, second_next_rel_packed)
-        self._write_bytes(self.relations, prev.id, second_prev_rel_packed)
+        self._write_bytes(self.relations, next.id*cfg.RELATION_SIZE, second_next_rel_packed)
+        self._write_bytes(self.relations, prev.id*cfg.RELATION_SIZE, second_prev_rel_packed)
 
     def del_property(self,id:int):
         """
