@@ -57,12 +57,11 @@ class GraphEngine:
         # Add new labels to the corresponding cache
         self._lb_cache[label.value] = label
         while next_prop is not None:
-            print(next_prop)
             self._lb_cache[next_prop.label] = next_prop.label
             next_prop = next_prop.next_prop
 
         # Update index (if any)
-        if not self._index:
+        if len(self._index) != 0:
             lookup = self._index_lookup((label, next_prop))
             for key, value in lookup.values():
                 if value not in self._index[label.id][key]:
@@ -83,11 +82,11 @@ class GraphEngine:
         label = self._dedupe_label(label)
         next_prop = self._dedupe_next_prop(next_prop)
 
-        is_directed = 0
+        is_directed = False
         if direction == 1:
-            is_directed = 1
+            is_directed = True
         elif direction == -1:
-            is_directed = 1
+            is_directed = True
             first_node, second_node = second_node, first_node
 
         retrieved_first_node = self._retrieve_node(first_node)
@@ -129,11 +128,12 @@ class GraphEngine:
         next_prop = self._dedupe_next_prop(next_prop)
         key_property = tuple(self._unroll_next_prop(next_prop).keys())
 
+        retrieved_node = self._retrieve_node((label, next_prop))
+
         if label.id not in self._index:
             self._index[label.id] = dict()
         self._index[label.id][key_property] = dict()
 
-        retrieved_node = self._retrieve_node((label, next_prop))
         for ind_node in retrieved_node:
             properties = self._unroll_next_prop(ind_node.next_prop)
 
@@ -143,7 +143,7 @@ class GraphEngine:
             key_value = tuple(key_value)
 
             if key_value not in self._index[label.id][key_property]:
-                self._index[label.id][key_property] = list()
+                self._index[label.id][key_property][key_value] = list()
             self._index[label.id][key_property][key_value].append(ind_node.id)
 
     def delete_node(self, node):
@@ -188,8 +188,9 @@ class GraphEngine:
             retrieved_node[0] = self._retrieve_node(nodes.pop())
         else:
             iterator = iter(nodes)
-            for first_node, second_node, relationship in zip(zip(iterator, iterator), relationships):
+            for nodes, relationship in zip(zip(iterator, iterator), relationships):
                 # For now assume that this chain contains only one relationship
+                first_node, second_node = nodes
                 retrieved_relationship = self._retrieve_relationship(first_node, second_node, relationship)
                 retrieved_node[0] = [first_node for first_node, _, _ in retrieved_relationship]
                 retrieved_node[1] = [second_node for _, second_node, _ in retrieved_relationship]
@@ -221,8 +222,7 @@ class GraphEngine:
         for key, value in conformity.items():
             keys = value.keys()
             if set(key) == set(keys):
-                values = value.values()
-                result[key] = tuple([values[k] for k in key])
+                result[key] = tuple([value[k] for k in list(key)])
 
         return result
 
@@ -243,11 +243,11 @@ class GraphEngine:
         next_prop = self._dedupe_next_prop(next_prop)
         rel_properties = self._unroll_next_prop(next_prop)
 
-        is_directed = 0
+        is_directed = False
         if direction == 1:
-            is_directed = 1
+            is_directed = True
         elif direction == -1:
-            is_directed = 1
+            is_directed = True
             first_node, second_node = second_node, first_node
 
         retrieved_first_node = dict()
@@ -271,7 +271,7 @@ class GraphEngine:
                 retrieved_second_node[second.id] = second
 
         retrieved_relationship = list()
-        for first in retrieved_first_node:
+        for _, first in retrieved_first_node.items():
             first_next_rel = first.next_rel
             while first_next_rel is not None:
                 if type(first_next_rel) is not Relationship:
@@ -289,11 +289,11 @@ class GraphEngine:
 
                 if appropriate:
                     second = None
-                    if not retrieved_second_node:
+                    if len(retrieved_second_node) != 0:
                         if first_next_rel.second_node in retrieved_second_node:
                             second = retrieved_second_node[first_next_rel.second_node]
                     else:
-                        second = self._io.read_node(first_next_rel.second_node)
+                        second = self._io.read_node(first_next_rel.second_node.id)
                         retrieved_second_properties = self._unroll_next_prop(second.next_prop)
 
                         if second.label.id != second_label.id or (not (second_next_prop is None or
@@ -303,7 +303,8 @@ class GraphEngine:
 
                     if second is not None:
                         retrieved_relationship.append((first, second, first_next_rel.id))
-                    first_next_rel = first_next_rel.first_next_rel
+                first_next_rel = first_next_rel.first_next_rel
+
         return retrieved_relationship
 
     def _retrieve_node(self, node):
@@ -322,10 +323,14 @@ class GraphEngine:
         nodes_to_retrieve = set()
 
         # Perform lookup to find indexes
-        lookup = self._index_lookup(node) if not self._index else dict()
-        if not lookup:
-            key, value = lookup.popitem()
-            nodes_to_retrieve = self._index[label.id][key][value]
+        if len(self._index) != 0:
+            lookup = self._index_lookup(node)
+            if len(lookup) != 0:
+                key, value = lookup.popitem()
+                nodes_to_retrieve = self._index[label.id][key][value]
+
+                if not nodes_to_retrieve:
+                    return list()
 
         retrieved_nodes = self._io.get_nodes_by_id(nodes_to_retrieve)
 
@@ -338,7 +343,8 @@ class GraphEngine:
                 retrieved_node_properties = self._unroll_next_prop(retrieved_node.next_prop)
 
                 if next_prop is None or (retrieved_node_properties is not None and
-                        all(retrieved_node_properties[k] == v for k, v in node_properties.items())):
+                        all(retrieved_node_properties[k] == v if k in retrieved_node_properties else False
+                            for k, v in node_properties.items())):
                     filtered_retrieved_nodes.append(retrieved_node)
         return filtered_retrieved_nodes
 
@@ -366,10 +372,11 @@ class GraphEngine:
         :return: Property.
         """
 
+        saved_pointer = next_prop
         while next_prop is not None:
             next_prop.label = self._dedupe_label(next_prop.label)
             next_prop = next_prop.next_prop
-        return next_prop
+        return saved_pointer
 
     def _dedupe_label(self, label):
         """

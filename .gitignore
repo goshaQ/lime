@@ -104,8 +104,4 @@ ENV/
 .idea/
 
 # Internal
-labels
-nodes
-properties
-relationships
-store
+.stores/

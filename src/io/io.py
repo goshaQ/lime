@@ -15,16 +15,19 @@ from src.io.unpacker import Unpacker
 class Io:
 
     def __init__(self,):
-        self.nodes = open(cfg.NODE_FILENAME,"a+b")
-        self.labels = open(cfg.LABEL_FILENAME,"a+b")
-        self.properties = open(cfg.PROPERTY_FILENAME,"a+b")
-        self.relations = open(cfg.RELATIONSHIP_FILENAME,"a+b")
-        self.store = open(cfg.STORE_FILENAME,"a+b")
-        self.last_node_id = int(os.stat(cfg.NODE_FILENAME).st_size / cfg.NODE_SIZE)
-        self.last_relation_id = int(os.stat(cfg.RELATIONSHIP_FILENAME).st_size / cfg.RELATION_SIZE)
-        self.last_property_id = int(os.stat(cfg.PROPERTY_FILENAME).st_size / cfg.PROPERTY_SIZE)
-        self.last_label_id = int(os.stat(cfg.LABEL_FILENAME).st_size / cfg.LABEL_SIZE)
-        self.last_store_id = int(os.stat(cfg.STORE_FILENAME).st_size / cfg.STORE_SIZE)
+        if not os.path.exists(cfg.PATH):
+            os.makedirs(cfg.PATH)
+
+        self.nodes = open(os.path.join(cfg.PATH, cfg.NODE_FILENAME), "w+b")
+        self.labels = open(os.path.join(cfg.PATH, cfg.LABEL_FILENAME),"w+b")
+        self.properties = open(os.path.join(cfg.PATH, cfg.PROPERTY_FILENAME),"w+b")
+        self.relations = open(os.path.join(cfg.PATH, cfg.RELATIONSHIP_FILENAME),"w+b")
+        self.store = open(os.path.join(cfg.PATH, cfg.STORE_FILENAME),"w+b")
+        self.last_node_id = int(os.stat(os.path.join(cfg.PATH, cfg.NODE_FILENAME)).st_size / cfg.NODE_SIZE)
+        self.last_relation_id = int(os.stat(os.path.join(cfg.PATH, cfg.RELATIONSHIP_FILENAME)).st_size / cfg.RELATION_SIZE)
+        self.last_property_id = int(os.stat(os.path.join(cfg.PATH, cfg.PROPERTY_FILENAME)).st_size / cfg.PROPERTY_SIZE)
+        self.last_label_id = int(os.stat(os.path.join(cfg.PATH, cfg.LABEL_FILENAME)).st_size / cfg.LABEL_SIZE)
+        self.last_store_id = int(os.stat(os.path.join(cfg.PATH, cfg.STORE_FILENAME)).st_size / cfg.STORE_SIZE)
 
     def get_nodes_by_id(self, nodes: set) -> list:
         """
@@ -33,7 +36,7 @@ class Io:
         :return: list of nodes with matching id
         """
         if len(nodes) == 0:
-            nodes = range(0,self.last_node_id,cfg.NODE_SIZE)
+            nodes = range(0, self.last_node_id)
         result = []
         for id in nodes:
             node = self.read_node(id)
@@ -48,7 +51,7 @@ class Io:
         :return: list of labels with matching id
         """
         if len(labels) == 0:
-            labels = range(0,self.last_label_id,cfg.LABEL_SIZE)
+            labels = range(0, self.last_label_id)
         result = []
         for id in labels:
             label = self.read_label(id)
@@ -63,7 +66,7 @@ class Io:
         :return: list of relations with matching id
         """
         if len(relations) == 0:
-            relations = range(0,self.last_relation_id,cfg.RELATION_SIZE)
+            relations = range(0, self.last_relation_id)
         result = []
         for id in relations:
             relation = self.read_relation(id)
@@ -105,11 +108,12 @@ class Io:
         Writes property to file. Creates dynamic store if needed by property type. Inlines otherwise.
         :param property - property to write:
         """
+
         if property.id == cfg.INV_ID:
             property.id = self._get_property_id()
-        if (property.next_prop!=cfg.INV_ID) and not (property.next_prop is None):
+        if property.next_prop is not None:
             property.next_prop = self.write_property(property.next_prop)
-        if (property.label is None) or (property.label.id == cfg.INV_ID):
+        if property.label.id == cfg.INV_ID:
             property.label = self.write_label(property.label)
         if property.type.value == PropertyType.STRING.value:
             store_pointer = self.write_store(property.value)
@@ -125,33 +129,31 @@ class Io:
         Writes relation to file.
         :param relation - relation written:
         """
-        if relation.next_prop == None:
-            relation.next_prop = cfg.INV_ID
+        if relation.next_prop is not None:
+            relation.next_prop = self.write_property(relation.next_prop)
 
         if relation.id == cfg.INV_ID:
             relation.id = self._get_relation_id()
-        value = Packer.pack_relation(relation)
         relation.label = self.write_label(relation.label)
-        if (relation.next_prop != cfg.INV_ID) and (relation.next_prop is not None):
-            relation.next_prop = self.write_property(relation.next_prop)
 
-        if (relation.first_node != cfg.INV_ID) and (relation.first_node is not None):
+        if relation.first_node is not None:
             first_node = self.read_node(relation.first_node.id)
-            if (first_node.next_rel == cfg.INV_ID) or (first_node.next_rel is None):
+            if first_node.next_rel is None:
                 first_node.next_rel = relation
                 self.write_node(first_node)
             else:
                 self._update_next_rel(first_node, relation)
 
-        if (relation.second_node != cfg.INV_ID) and (relation.second_node is not None):
+        if relation.second_node is not None:
             second_node = self.read_node(relation.second_node.id)
-            if (second_node.next_rel == cfg.INV_ID) or (second_node.next_rel is None):
+            if second_node.next_rel is None:
                 second_node.next_rel = relation
 
                 self.write_node(second_node)
             else:
                 self._update_next_rel(second_node, relation)
 
+        value = Packer.pack_relation(relation)
         self._write_bytes(self.relations, relation.id * cfg.RELATION_SIZE, value)
         return relation
 
@@ -211,6 +213,7 @@ class Io:
         :param id: offset of node to read
         :return: Node unpacked
         """
+
         if id > self.last_node_id:
             raise Exception('Property ID is out of range')
         node_bytes = self._read_bytes(self.nodes,id,cfg.NODE_SIZE)
@@ -254,7 +257,7 @@ class Io:
         if id>self.last_property_id:
             raise Exception('Property ID is out of range')
         property_bytes = self._read_bytes(self.properties, id, cfg.PROPERTY_SIZE)
-        in_use,type, label, value, next_property = Unpacker.unpack_property(property_bytes)
+        in_use, type, label, value, next_property = Unpacker.unpack_property(property_bytes)
         if type == PropertyType.STRING.value:
             value = self.read_store(value)
         if type == PropertyType.FLOAT.value:
@@ -284,7 +287,8 @@ class Io:
             raise Exception('Relation ID is out of range')
 
         relation_bytes = self._read_bytes(self.relations, id, cfg.RELATION_SIZE)
-        in_use,type, first_node, second_node, label, property, first_prev_relation, first_next_relation, second_prev_relation, second_next_realtion = Unpacker.unpack_relation(id,relation_bytes)
+        in_use, type, first_node, second_node, label, property, first_prev_relation, first_next_relation, \
+            second_prev_relation, second_next_relation = Unpacker.unpack_relation(id, relation_bytes)
         if in_use:
             label = self.read_label(label)
             if property!=cfg.INV_ID:
@@ -302,14 +306,14 @@ class Io:
                 second_node = None
             if first_next_relation == cfg.INV_ID:
                 first_next_relation = None
-            if second_next_realtion == cfg.INV_ID:
-                second_next_realtion = None
+            if second_next_relation == cfg.INV_ID:
+                second_next_relation = None
             if first_prev_relation == cfg.INV_ID:
                 first_prev_relation = None
             if second_prev_relation == cfg.INV_ID:
                 second_prev_relation = None
             return Relationship(id, type, first_node, second_node, label, property,
-                                first_prev_relation, first_next_relation, second_prev_relation, second_next_realtion)
+                                first_prev_relation, first_next_relation, second_prev_relation, second_next_relation)
         else:
             return cfg.INV_ID
 

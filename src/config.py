@@ -9,7 +9,7 @@ LABEL_SIZE = struct.calcsize("? i")
 INV_ID = -2147483648
 
 
-FILES_DIRECTORY = "store\\"
+PATH = ".stores"
 NODE_FILENAME = "nodes"
 LABEL_FILENAME = "labels"
 PROPERTY_FILENAME = "properties"

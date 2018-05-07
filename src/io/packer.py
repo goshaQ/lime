@@ -17,7 +17,8 @@ class Packer:
         """
         first_node = relation.first_node.id
         second_node = relation.second_node.id
-        type = True
+        type = relation.is_directed
+
         if (relation.first_prev_rel == cfg.INV_ID) or (relation.first_prev_rel is None):
             first_prev_relation = cfg.INV_ID
         else:
@@ -62,12 +63,12 @@ class Packer:
         :return:
         """
         label = node.label.id
-        if (node.next_prop == cfg.INV_ID) or (node.next_prop is None):
+        if node.next_prop is None:
             property = cfg.INV_ID
         else:
             property = node.next_prop.id
 
-        if (node.next_rel == cfg.INV_ID) or (node.next_rel is None):
+        if node.next_rel is None:
             relation = cfg.INV_ID
         elif type(node.next_rel) is Relationship:
             relation = node.next_rel.id
@@ -81,7 +82,7 @@ class Packer:
         :return:
         """
         key = property.label.id
-        if(property.next_prop == cfg.INV_ID) or (property.next_prop is None):
+        if property.next_prop is None:
             next = cfg.INV_ID
         else:
             next = property.next_prop.id

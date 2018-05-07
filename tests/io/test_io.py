@@ -108,6 +108,7 @@ class TestIO(unittest.TestCase):
         retrived = io.read_node(written.id)
         self.assertEqual(node.id,retrived.id)
         self.assertEqual(node.next_prop.id,retrived.next_prop.id)
+        self.assertEqual(node.next_prop.label.value,property.label.value)
         self.assertEqual(node.label.value,retrived.label.value)
         self.assertEqual(node.label.id,retrived.label.id)
 
@@ -144,7 +145,7 @@ class TestIO(unittest.TestCase):
             value = "Macarena"
             label = Label(cfg.INV_ID, value)
             label = io.write_label(label)
-            node = Node(cfg.INV_ID, label, cfg.INV_ID, cfg.INV_ID)
+            node = Node(cfg.INV_ID, label, None, None)
             node = io.write_node(node)
             nodes.append(node.id)
         node_list = io.get_nodes_by_id(set(nodes))
