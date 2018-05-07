@@ -39,7 +39,39 @@ class Io:
             nodes = range(0,self.last_node_id,cfg.NODE_SIZE)
         result = []
         for id in nodes:
-            result.append(self.read_node(id))
+            node = self.read_node(id)
+            if node != config.INV_ID:
+                result.append(node)
+        return result
+
+    def get_labels_by_id(self, labels: set) -> list:
+        """
+        Gets labels by specified id. If input set is empty fetches all labels
+        :param labels: - set of id's to fetch
+        :return: list of labels with matching id
+        """
+        if len(labels) == 0:
+            labels = range(0,self.last_label_id,cfg.LABEL_SIZE)
+        result = []
+        for id in labels:
+            label = self.read_label(id)
+            if label != config.INV_ID:
+                result.append(label)
+        return result
+
+    def get_relations_by_id(self, relations: set) -> list:
+        """
+        Gets relations by specified id. If input set is empty fetches all relations
+        :param relations: - set of id's to fetch
+        :return: list of relations with matching id
+        """
+        if len(relations) == 0:
+            relations = range(0,self.last_relation_id,cfg.RELATION_SIZE)
+        result = []
+        for id in relations:
+            relation = self.read_relation(id)
+            if relation != config.INV_ID:
+                result.append(relation)
         return result
 
     def write_node(self, node: Node) -> Node:
@@ -136,9 +168,12 @@ class Io:
         if id>self.last_node_id:
             raise Exception('Property ID is out of range')
         node_bytes = self._read_bytes(self.nodes,id,cfg.NODE_SIZE)
-        label_id, prop_id, relation_id = Unpacker.unpack_node(id,node_bytes)
-        label = self.read_label(label_id)
-        return Node(id,label,prop_id,relation_id)
+        in_use,label_id, prop_id, relation_id = Unpacker.unpack_node(id,node_bytes)
+        if in_use:
+            label = self.read_label(label_id)
+            return Node(id,label,prop_id,relation_id)
+        else:
+            return config.INV_ID
 
     def read_label(self, id) -> Label:
         """
@@ -151,9 +186,12 @@ class Io:
 
         label_bytes = self._read_bytes(self.labels, id, cfg.LABEL_SIZE)
 
-        store_id = Unpacker.unpack_label(label_bytes)
-        value = self.read_store(store_id)
-        return Label(id,value)
+        in_use,store_id = Unpacker.unpack_label(label_bytes)
+        if in_use:
+            value = self.read_store(store_id)
+            return Label(id,value)
+        else:
+            return config.INV_ID
 
     def read_property(self, id: int) -> Property:
         """
@@ -164,15 +202,18 @@ class Io:
         if id>self.last_property_id:
             raise Exception('Property ID is out of range')
         property_bytes = self._read_bytes(self.properties, id, cfg.PROPERTY_SIZE)
-        type, label_id, value, next_property_id = Unpacker.unpack_property(property_bytes)
+        in_use,type, label_id, value, next_property_id = Unpacker.unpack_property(property_bytes)
         if type == PropertyType.STRING.value:
             value = self.read_store(value)
         if type == PropertyType.FLOAT.value:
             value = float(value)
         if type == PropertyType.CHAR.value:
             value = value.decode("utf8")
-        label = self.read_label(label_id)
-        return Property(id,PropertyType(type),label,value,next_property_id)
+        if in_use:
+            label = self.read_label(label_id)
+            return Property(id,PropertyType(type),label,value,next_property_id)
+        else:
+            return config.INV_ID
 
     def read_relation(self, id) -> Relationship:
         """
@@ -180,16 +221,18 @@ class Io:
         :param id: offset of relation to read
         :return: Relation unpacked
         """
-        if id>self.last_relation_id:
+        if id > self.last_relation_id:
             raise Exception('Relation ID is out of range')
 
         relation_bytes = self._read_bytes(self.relations, id, cfg.RELATION_SIZE)
-        type, first_node, second_node, label, property, first_prev_relation, first_next_relation, second_prev_relation, second_next_realtion = Unpacker.unpack_relation(id,relation_bytes)
-        label = self.read_label(label)
+        in_use,type, first_node, second_node, label, property, first_prev_relation, first_next_relation, second_prev_relation, second_next_realtion = Unpacker.unpack_relation(id,relation_bytes)
+        if in_use:
+            label = self.read_label(label)
 
-        return Relationship(id, type, first_node, second_node, label, property,
-                            first_prev_relation, first_next_relation, second_prev_relation, second_next_realtion)
-
+            return Relationship(id, type, first_node, second_node, label, property,
+                                first_prev_relation, first_next_relation, second_prev_relation, second_next_realtion)
+        else:
+            return config.INV_ID
 
     def read_store(self,id: int) -> str:
         """
@@ -235,14 +278,84 @@ class Io:
         relation = self.read_relation(id)
         new_bytes = Packer.pack_relation(relation,in_use=False)
         self._write_bytes(self.relations,id*cfg.RELATION_SIZE,new_bytes)
+        self.del_property(relation.next_prop)
         if relation.next_prop != config.INV_ID:
             self.del_property(relation.next_prop)
-        if relation.first_node == config.INV_ID:
-            #TODO: Remove all first relationships
-        elif relation.second_node == config.INV_ID:
-            #TODO: Remove second relationships
+        if (relation.second_next_rel != config.INV_ID) and (relation.second_prev_rel != config.INV_ID):
+            second_next_rel = self.read_relation(relation.second_next_rel)
+            second_prev_rel = self.read_relation(relation.second_prev_rel)
+            self._swap_relation_pointer(second_next_rel,second_prev_rel)
+        elif (relation.second_next_rel != config.INV_ID) and not (relation.second_prev_rel != config.INV_ID):
+            second_next_rel = self.read_relation(relation.second_next_rel)
+            self._fix_next_rel(relation,second_next_rel)
+        elif (relation.second_prev_rel != config.INV_ID) and not (relation.second_next_rel != config.INV_ID):
+            second_prev_rel = self.read_relation(relation.second_prev_rel)
+            self._fix_prev_rel(relation,second_prev_rel)
+        if (relation.first_next_rel != config.INV_ID) and (relation.first_prev_rel != config.INV_ID):
+            first_next_rel = self.read_relation(relation.first_next_rel)
+            first_prev_rel = self.read_relation(relation.first_prev_rel)
+            self._swap_relation_pointer(first_next_rel,first_prev_rel)
+        elif (relation.first_next_rel != config.INV_ID) and not (relation.first_prev_rel != config.INV_ID):
+            first_next_rel = self.read_relation(relation.first_next_rel)
+            self._fix_next_rel(relation,first_next_rel)
+        elif (relation.first_prev_rel != config.INV_ID) and not (relation.first_next_rel != config.INV_ID):
+            first_prev_rel = self.read_relation(relation.first_prev_rel)
+            self._fix_prev_rel(relation,first_prev_rel)
+
+    def _fix_next_rel(self,current: Relationship,next_rel: Relationship):
+        """
+        Sets next_rel prev pointer to INV_ID
+        :param current:
+        :param next_rel:
+        :return:
+        """
+        if(current.second_node == next_rel.second_node):
+            next_rel.second_prev_id = config.INV_ID
+        elif(current.second_node == next_rel.first_node):
+            next_rel.first_prev_id = config.INV_ID
+        prev_packed = Packer.pack_relation(next_rel)
+        self._write_bytes(self.relations, next_rel.id, prev_packed)
+
+    def _fix_prev_rel(self,current: Relationship,prev_rel: Relationship):
+        """
+        Sets prev_rel next pointer to INV_ID
+        :param current:
+        :param prev_rel:
+        :return:
+        """
+        if(current.second_node == prev_rel.second_node):
+            prev_rel.second_next_id = config.INV_ID
+        elif(current.second_node == prev_rel.first_node):
+            prev_rel.first_next_id = config.INV_ID
+        prev_packed = Packer.pack_relation(prev_rel)
+        self._write_bytes(self.relations, prev_rel.id, prev_packed)
+
+    def _swap_relation_pointer(self,next: Relationship, prev: Relationship):
+        """
+        Swaps pointer of two relations. Helper function for deletion of relation
+        :param next:
+        :param prev:
+        :return:
+        """
+        if (prev.second_node == next.second_node):
+            prev.second_next_rel = next.id
+            next.second_prev_rel = prev.id
+        elif (prev.first_node == next.first_node):
+            prev.first_next_rel = next.id
+            next.first_prev_rel = prev.id
+        elif (prev.first_node == next.second_node):
+            prev.first_next_rel = next.id
+            next.second_prev_rel = prev.id
+        elif (prev.second_node == next.first_node):
+            prev.second_next_rel = next.id
+            next.first_prev_rel = prev.id
         else:
-            #TODO: Doouble linked list node swap
+            raise Exception('No same nodes to swap')
+
+        second_prev_rel_packed = Packer.pack_relation(prev)
+        second_next_rel_packed = Packer.pack_relation(next)
+        self._write_bytes(self.relations, next.id, second_next_rel_packed)
+        self._write_bytes(self.relations, prev.id, second_prev_rel_packed)
 
     def del_property(self,id:int):
         """
