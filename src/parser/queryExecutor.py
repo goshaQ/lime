@@ -1,6 +1,5 @@
 import sys
 sys.path.append('')
-
 from src.parser.queryParser import Parser
 from src.engine.label import Label
 from src.engine.property import Property

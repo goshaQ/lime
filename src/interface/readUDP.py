@@ -1,5 +1,7 @@
+import sys
+sys.path.append('')
 import socket
-from interface import Interface
+from src.interface.interface import Interface
 import json
 
 UDP_IP = '127.0.0.1'
