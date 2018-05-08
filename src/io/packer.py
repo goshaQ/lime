@@ -17,27 +17,36 @@ class Packer:
         """
         first_node = relation.first_node.id
         second_node = relation.second_node.id
-        type = relation.is_directed
+        direction = relation.is_directed
 
         if (relation.first_prev_rel == cfg.INV_ID) or (relation.first_prev_rel is None):
             first_prev_relation = cfg.INV_ID
-        else:
+        elif type(relation.first_prev_rel) is Relationship:
             first_prev_relation = relation.first_prev_rel.id
+        else:
+            first_prev_relation = relation.first_prev_rel
 
         if (relation.second_prev_rel == cfg.INV_ID) or (relation.second_prev_rel is None):
             second_prev_relation = cfg.INV_ID
-        else:
+        elif type(relation.second_prev_rel) is Relationship:
             second_prev_relation = relation.second_prev_rel.id
+        else:
+            second_prev_relation = relation.second_prev_rel
+
 
         if (relation.first_next_rel == cfg.INV_ID) or (relation.first_next_rel is None):
             first_next_relation = cfg.INV_ID
-        else:
+        elif type(relation.first_next_rel) is Relationship:
             first_next_relation = relation.first_next_rel.id
+        else:
+            first_next_relation = relation.first_next_rel
 
         if (relation.second_next_rel == cfg.INV_ID) or (relation.second_next_rel is None):
             second_next_realtion = cfg.INV_ID
-        else:
+        elif type(relation.second_next_rel) is Relationship:
             second_next_realtion = relation.second_next_rel.id
+        else:
+            second_next_realtion = relation.second_next_rel
 
         if (relation.next_prop == cfg.INV_ID) or (relation.next_prop is None):
             property = cfg.INV_ID
@@ -45,7 +54,7 @@ class Packer:
             property = relation.next_prop.id
 
         label = relation.label.id
-        return struct.pack("? ? i i i i i i i i",in_use,type, first_node,second_node, label,property,first_prev_relation,first_next_relation,second_prev_relation,second_next_realtion)
+        return struct.pack("? ? i i i i i i i i",in_use,direction, first_node,second_node, label,property,first_prev_relation,first_next_relation,second_prev_relation,second_next_realtion)
 
     def pack_label(value_pointer: int, label: Label, in_use=True) -> bytes:
         """

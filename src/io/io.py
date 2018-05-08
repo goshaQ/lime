@@ -158,25 +158,15 @@ class Io:
         return relation
 
     def _update_next_rel(self, node: Node, relation: Relationship):
-        next_relation = self.read_relation(node.next_rel)
-        if next_relation.first_node == node.id:
-            next_rel = next_relation.first_next_rel
-        if next_relation.second_node == node.id:
-            next_rel = next_relation.second_next_rel
-
-        while (next_rel != cfg.INV_ID) and (next_rel is not None):
-            next_relation = self.read_relation(next_rel)
-            if next_relation.first_node == node.id:
-                next_rel = next_relation.first_next_rel
-            if next_relation.second_node == node.id:
-                next_rel = next_relation.second_next_rel
-
-        if next_relation.first_node == node.id:
-            next_relation.first_next_rel = relation
-            self.write_relation(next_relation)
-        if relation.second_node == node.id:
-            next_relation.second_next_rel = relation
-            self.write_relation(next_relation)
+        next_rel = self.read_relation(node.next_rel)
+        node.next_rel = relation.id
+        if next_rel.second_node.id == node.id:
+            next_rel.second_prev_rel = relation.id
+        if next_rel.first_node.id == node.id:
+            next_rel.first_prev_rel = relation.id
+        self.write_node(node)
+        value = Packer.pack_relation(next_rel)
+        self._write_bytes(self.relations, next_rel.id * cfg.RELATION_SIZE, value)
 
     def write_store(self,value :str) -> int:
         """
