@@ -182,6 +182,10 @@ Data access API:
 
 ![alt text](https://github.com/goshaQ/lime/blob/master/pics/dataAPI.png?raw=true "Data access API")
 
+![alt text](https://github.com/goshaQ/lime/blob/master/pics/main.png?raw=true "Terminal")
+
+![alt text](https://github.com/goshaQ/lime/blob/master/pics/query.png?raw=true "Queries")
+
 ## Authors
 - Gosha Emelyanov - [goshaQ](https://github.com/goshaQ)
 - Bulat Maksudov - [Luab](https://github.com/Luab) 
