@@ -28,12 +28,8 @@ python3 run_tests.py
 ## Built with
 - [Python 3.6](https://www.python.org/downloads/release/python-360/)
 ### Data API
-
-### Graph Engine
 - [Rtree 0.8.3](https://pypi.org/project/Rtree/)
 - [libspatialindex](http://libspatialindex.github.io/index.html)
-
-### Filesystem
 
 ## Work process
 After running the `cli.py` two threads are created:
