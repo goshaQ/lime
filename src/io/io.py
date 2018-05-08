@@ -142,7 +142,7 @@ class Io:
                 first_node.next_rel = relation
                 self.write_node(first_node)
             else:
-                self._update_next_rel(first_node, relation)
+                relation = self._update_next_rel(first_node, relation)
 
         if relation.second_node is not None:
             second_node = self.read_node(relation.second_node.id)
@@ -151,7 +151,7 @@ class Io:
 
                 self.write_node(second_node)
             else:
-                self._update_next_rel(second_node, relation)
+                relation = self._update_next_rel(second_node, relation)
 
         value = Packer.pack_relation(relation)
         self._write_bytes(self.relations, relation.id * cfg.RELATION_SIZE, value)
@@ -167,6 +167,11 @@ class Io:
         self.write_node(node)
         value = Packer.pack_relation(next_rel)
         self._write_bytes(self.relations, next_rel.id * cfg.RELATION_SIZE, value)
+        if relation.first_node.id == node.id:
+            relation.first_next_rel = next_rel
+        if relation.second_node.id == node.id:
+            relation.second_next_rel = next_rel
+        return relation
 
     def write_store(self,value :str) -> int:
         """
