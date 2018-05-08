@@ -9,23 +9,25 @@ class Interface():
         self._executor = Executor()
 
     def add_index(self, query):
-        self._executor.execute_indexing(query)
+        return self._executor.execute_indexing(query)
 
     def add_figures(self, data):
         queries = []
         for d in data:
             x = round(d['x'], 2)
             y = round(d['y'], 2)
-            if not self._check_existence(x, y):
-                query = "CREATE (node:Figure {x: %f, y: %f}) RETURN node" % (x, y)
-                queries.append(query)
-        self._executor.execute_creation(queries)
+            # if not self._check_existence(x, y):
+            print("hi!")
+            query = "CREATE (node:Figure {x: %f, y: %f}) RETURN node" % (x, y)
+            queries.append(query)
+            print(query)
+        return self._executor.execute_creation(queries)
     
     def add_figure(self, query):
-        self._executor.execute_creation([query])
+        return self._executor.execute_creation([query])
 
     def add_relationship(self, query):
-        self._executor.add_relationship(query)
+        return self._executor.add_relationship(query)
 
     def _check_existence(self, x, y):
         query = "MATCH (node:Figure {x: %f, y: %f} RETURN node)" % (x, y)
@@ -39,4 +41,4 @@ class Interface():
         return self._executor.execute_getting(query)
 
     def remove_node(self, query):
-        self._executor.execute_removing(query)
+        return self._executor.execute_removing(query)

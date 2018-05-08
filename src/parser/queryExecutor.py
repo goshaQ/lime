@@ -6,12 +6,13 @@ from src.engine.property import Property
 from src.engine.property_type import PropertyType
 from src.engine.graph_engine import GraphEngine
 from src.parser.relationCreator import RelationCreator
+from src.config import INV_ID
 
 class Executor():
 
     def __init__(self):
         self._parser = Parser()
-        self._id = 1 # TODO; MIN_INT from config.py
+        self._id = INV_ID
         self._engine = GraphEngine()
 
     def execute_indexing(self, query):
@@ -19,14 +20,14 @@ class Executor():
         label = Label(self._id, label)
         properties = []
         for p in values:
-            v = Property(self._id, PropertyType.STRING, label, p, None)
+            v = Property(self._id, PropertyType.STRING, label, None, None)
             properties.append(v)
         # for i in range(len(properties) - 2):
         #     properties[i].next_prop(properties[i+1]) 
         if len(properties) > 1:
             properties[0].next_prop = properties[1]
         assert(len(values) == len(properties))
-        # TODO: send to indexing in engine
+        self._engine.create_index((label, properties[0]))
 
     def execute_creation(self, queries):
         objects = []
@@ -87,9 +88,10 @@ class Executor():
         if rel_props is not None:
             for p in rel_props:
                 v = Property(self._id, PropertyType.STRING, rel_label, p, None)
+                rel_properties.append(v)
             if len(rel_properties) > 1:
                 rel_properties[0].next_prop = rel_properties[1]
-        relationship = (rel_label, rel_properties, direction)
+            relationship = (rel_label, rel_properties[0], direction)
         self._engine.create_relationship(node1, node2, relationship)
 
         
@@ -106,7 +108,7 @@ class Executor():
             if len(properties) > 1:
                 properties[0].next_prop = properties[1]
             assert(len(data) == len(properties))
-            return self._engine.match_pattern((label, properties), relationships=None)
+            return self._engine.match_pattern((label, properties[0]), [])
         else:
             if "[:" in query:
                 node_label, node_values, relations = self._parser.parse(query)
@@ -120,7 +122,7 @@ class Executor():
                 if len(properties) > 1:
                     properties[0].next_prop = properties[1]
                 assert(len(node_values) == len(properties))
-                nodes = [(node_label, properties)]
+                nodes = [(node_label, properties[0])]
                 relationships = []
                 if len(relations) > 2:
                     direction = relations[0]
@@ -134,13 +136,12 @@ class Executor():
                     if len(properties) > 1:
                         properties[0].next_prop = properties[1]
                     assert(len(relations[2]) == len(properties))
-                    relationships.append((label, properties, direction))
+                    relationships.append((label, properties[0], direction))
                 else:
                     direction = relations[0]
                     label = Label(self._id, relations[1])
                     relationships.append((label, None, direction))
-
-                self._engine.match_pattern(nodes, relationships)
+                return self._engine.match_pattern(nodes, relationships)
             else:
                 node_label, node_values = self._parser.parse(query)
                 node_label = Label(self._id, node_label)
@@ -153,7 +154,11 @@ class Executor():
                 if len(properties) > 1: 
                     properties[0].next_prop = properties[1]
                 assert(len(node_values) == len(properties))
-                nodes = [(node_label, properties)]
+                if len(properties) == 0:
+                    nodes = [(node_label, None)]
+                else:
+                    nodes = [(node_label, properties[0])]
+                return self._engine.match_pattern(nodes, None)
 
     def execute_removing(self, query):
         label, values = self._parser.parse(query)
@@ -167,4 +172,4 @@ class Executor():
         if len(properties) > 1:
             properties[0].next_prop = properties[1]
         assert(len(values) == len(properties))
-        self._engine.delete_node((label, properties))
+        return self._engine.delete_node((label, properties[0]))

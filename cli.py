@@ -1,4 +1,6 @@
-from readUDP import read
+import sys
+sys.path.append('')
+from src.interface.readUDP import read
 from src.interface.interface import Interface
 import threading
 
@@ -24,7 +26,9 @@ class CLI():
                 print("RTFM -> https://github.com/goshaQ/lime")
             elif ":search" in user_input:
                 query = input("Enter query: ")
-                self._interface.get_figures(query)
+                result = self._interface.get_figures(query)
+                for key, value in result.items():
+                    self._toString(value)
             elif ":node" in user_input:
                 query = input("Enter query: ")
                 self._interface.add_figure(query)
@@ -43,7 +47,27 @@ class CLI():
             else:
                 print("RTFM. Type ':help'")
 
+    def _toString(self, value):
+        for v in value:
+            template = "Label: %s;" %(v.label.value)
+            next_prop = v.next_prop
+            properties = []
+            while next_prop is not None:
+                properties.append(next_prop.value)
+                next_prop = next_prop.next_prop
+            i = 1
+            for p in properties:
+                template += " property_%s: %s;" %(str(i), str(p))
+                i += 1
+            print(template)
 
 if __name__ == "__main__":    
     cli = CLI()
     cli.userQueryListener()
+
+
+# MATCH (node1:Figure {x: 10, y: 15})-[:LEFT]->(node2:Figure) RETURN node2
+
+# CREATE (node:Figure {x: 5, y: 15, color: red}) RETURN node
+
+# MATCH (a:Figure {x: 10, y:15}), (b:Figure {x: 5, y:15}) CREATE (a)-[r:LEFT {color: red}]->(b) RETURN a, b

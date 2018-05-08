@@ -34,7 +34,6 @@ class RelationCreator():
         down = None
         try:
             nearest = [n.object for n in self._ind.nearest((float(object[1].value), float(object[1].next_prop.value)), self._nearest, objects=True)]
-            
             obj_x = float(object[1].value)
             obj_y = float(object[1].next_prop.value)
             for n in nearest:

@@ -81,7 +81,6 @@ class Parser():
         """
         CREATE (node:Figure {x: 10, y: 15}) RETURN node
         """
-        self._check_create(query)
         label = tokens[1].replace('(', '').split(':', 1)[1]
         properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
         node_data = []
@@ -92,16 +91,10 @@ class Parser():
             types.append(type(v))
         return label, node_data, types
 
-
-    def _check_create(self, query):
-        # TODO: implement checking correctness of the query
-        pass
-
     def _match_query(self, tokens, query):
         """
         MATCH (node:Figure {x: 10}) RETURN node
         """
-        self._check_match(query)
         if "[:" in query:
             return self._match_by_relations(query)
         else:
@@ -151,21 +144,20 @@ class Parser():
             print("RTFM")
 
     def _match_by_properties(self, query):
-        properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
-        values = []
-        for p in properties:
-            values.append(p.split(':', 1)[1])
-        return values
+        if '{' in query:
+            properties = query.split('{', 1)[1].split('}', 1)[0].replace(' ', '').split(',')
+            values = []
+            for p in properties:
+                values.append(p.split(':', 1)[1])
+            return values
+        else:
+            return []
 
     def _get_property_and_value(self, condition):
         prop = condition.split('.', 1)[1].split('=',1)[0]
         value = condition.split('=', 1)[1]
         return prop, value
 
-    def _check_match(self, query):
-        # TODO: implement checking correctness ofthe query
-        pass
-    
     def _remove_clause(self, query):
         """
         REMOVE (node:Figure {x: 10, y:10}) RETURN node
