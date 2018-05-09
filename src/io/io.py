@@ -515,7 +515,6 @@ class Io:
         Generates new pointer for label
         :return: pointer to label
         """
-        self.last_label_id = int(os.stat(os.path.join(cfg.PATH, cfg.LABEL_FILENAME)).st_size / cfg.LABEL_SIZE)
         pointer = self.last_label_id
         self.last_label_id += 1
         return pointer
@@ -525,7 +524,6 @@ class Io:
         Generates new pointer for node
         :return: pointer to node
         """
-        self.last_node_id = int(os.stat(os.path.join(cfg.PATH, cfg.NODE_FILENAME)).st_size / cfg.NODE_SIZE)
         pointer = self.last_node_id
         self.last_node_id += 1
         return pointer
@@ -535,7 +533,6 @@ class Io:
         Generates new pointer for store
         :return: pointer to store
         """
-        self.last_store_id = int(os.stat(os.path.join(cfg.PATH, cfg.STORE_FILENAME)).st_size / cfg.STORE_SIZE)
         pointer = self.last_store_id
         self.last_store_id += 1
         return pointer
@@ -545,14 +542,11 @@ class Io:
         Generates new pointer for property
         :return: pointer to property
         """
-        self.last_property_id = int(os.stat(os.path.join(cfg.PATH, cfg.PROPERTY_FILENAME)).st_size / cfg.PROPERTY_SIZE)
         pointer = self.last_property_id
         self.last_property_id += 1
         return pointer
 
     def _get_relation_id(self) -> int:
-        self.last_relation_id = int(
-            os.stat(os.path.join(cfg.PATH, cfg.RELATIONSHIP_FILENAME)).st_size / cfg.RELATION_SIZE)
         pointer = self.last_relation_id
         self.last_relation_id += 1
         return pointer
