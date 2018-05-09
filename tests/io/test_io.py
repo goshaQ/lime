@@ -144,6 +144,63 @@ class TestIO(unittest.TestCase):
         self.assertEqual(written2.next_rel,retrieved.id)
         self.assertEqual(written1.next_rel,retrieved.id)
 
+    def test_del_relation(self):
+        io = Io()
+        value = "You spin my head right ground right ground"
+        label = Label(cfg.INV_ID, value)
+        label = io.write_label(label)
+        prop_value = True
+        property = Property(cfg.INV_ID, PropertyType.BOOL, label, prop_value, None)
+        property = io.write_property(property)
+        node = Node(cfg.INV_ID, label, property, None)
+        node2 = Node(cfg.INV_ID, label, property, None)
+        written1 = io.write_node(node)
+        written2 = io.write_node(node2)
+        relation = Relationship(cfg.INV_ID, False, written1, written2, label, property, None, None, None, None)
+        written = io.write_relation(relation)
+        io.del_relation(written.id)
+        retrived = io.get_relations_by_id([written.id])
+        node1 = io.read_node(written1.id)
+        node2 = io.read_node(written2.id)
+        self.assertEqual(len(retrived), 0)
+        print(node1.next_rel)
+        print(node2.next_rel)
+        self.assertEqual(node1.next_rel is None,True)
+        self.assertEqual(node2.next_rel is None, True)
+
+
+    def test_node_deletion(self):
+        io = Io()
+        value = "Graph DB is AWESOME"
+        label = Label(cfg.INV_ID, value)
+        prop_value = True
+        property = Property(cfg.INV_ID, PropertyType.BOOL, label, prop_value, None)
+        node = Node(cfg.INV_ID, label, property, cfg.INV_ID)
+        written = io.write_node(node)
+        io.del_node(written.id)
+        retrieved = io.get_nodes_by_id([written.id])
+        self.assertEqual(len(retrieved), 0)
+
+    def test_multirelation_deletion(self):
+        io = Io()
+        value = "You spin my head right ground right ground"
+        label = Label(cfg.INV_ID, value)
+        label = io.write_label(label)
+        prop_value = True
+        property = Property(cfg.INV_ID, PropertyType.BOOL, label, prop_value, None)
+        property = io.write_property(property)
+        node = Node(cfg.INV_ID, label, property, None)
+        node2 = Node(cfg.INV_ID, label, property, None)
+        written_node1 = io.write_node(node)
+        written_node2 = io.write_node(node2)
+        relation1 = Relationship(cfg.INV_ID, False, written_node1, written_node2, label, property, None, None, None, None)
+        relation2 = Relationship(cfg.INV_ID, False, written_node1, written_node2, label, property, None, None, None, None)
+        written_rel1 = io.write_relation(relation1)
+        written_rel2 = io.write_relation(relation2)
+        io.del_node(written_node1.id)
+        retrived = io.get_relations_by_id([written_rel1.id,written_rel2.id])
+        self.assertEqual(len(retrived),0)
+
     def test_get_nodes_io(self):
         io = Io()
         nodes = []
