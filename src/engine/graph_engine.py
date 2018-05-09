@@ -94,18 +94,9 @@ class GraphEngine:
 
         for first in retrieved_first_node:
             for second in retrieved_second_node:
-                first_prev_rel = first.next_rel
-                if first_prev_rel is not None:
-                    while first_prev_rel.next_rel is not None:
-                        first_prev_rel = first_prev_rel.next_rel
-                second_prev_rel = second.next_rel
-                if second_prev_rel is not None:
-                    while second_prev_rel.next_rel is not None:
-                        second_prev_rel = second_prev_rel.next_rel
-
                 created_relationship = self._io.write_relation(
                     Relationship(cfg.INV_ID, is_directed, first, second, label, next_prop,
-                                 first_prev_rel, None, second_prev_rel, None))
+                                 None, None, None, None))
                 label, next_prop = created_relationship.label, created_relationship.next_prop
 
                 # Add new labels to the corresponding cache
