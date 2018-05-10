@@ -16,18 +16,12 @@ class Io:
     def __init__(self, ):
         if not os.path.exists(cfg.PATH):
             os.makedirs(cfg.PATH)
-        try:
-            self.nodes = open(os.path.join(cfg.PATH, cfg.NODE_FILENAME), "r+b")
-            self.labels = open(os.path.join(cfg.PATH, cfg.LABEL_FILENAME), "r+b")
-            self.properties = open(os.path.join(cfg.PATH, cfg.PROPERTY_FILENAME), "r+b")
-            self.relations = open(os.path.join(cfg.PATH, cfg.RELATIONSHIP_FILENAME), "r+b")
-            self.store = open(os.path.join(cfg.PATH, cfg.STORE_FILENAME), "r+b")
-        except FileNotFoundError:
-            self.nodes = open(os.path.join(cfg.PATH, cfg.NODE_FILENAME), "w+b")
-            self.labels = open(os.path.join(cfg.PATH, cfg.LABEL_FILENAME), "w+b")
-            self.properties = open(os.path.join(cfg.PATH, cfg.PROPERTY_FILENAME), "w+b")
-            self.relations = open(os.path.join(cfg.PATH, cfg.RELATIONSHIP_FILENAME), "w+b")
-            self.store = open(os.path.join(cfg.PATH, cfg.STORE_FILENAME), "w+b")
+
+        self.nodes = open(os.path.join(cfg.PATH, cfg.NODE_FILENAME), "w+b")
+        self.labels = open(os.path.join(cfg.PATH, cfg.LABEL_FILENAME), "w+b")
+        self.properties = open(os.path.join(cfg.PATH, cfg.PROPERTY_FILENAME), "w+b")
+        self.relations = open(os.path.join(cfg.PATH, cfg.RELATIONSHIP_FILENAME), "w+b")
+        self.store = open(os.path.join(cfg.PATH, cfg.STORE_FILENAME), "w+b")
         self.last_node_id = int(os.stat(os.path.join(cfg.PATH, cfg.NODE_FILENAME)).st_size / cfg.NODE_SIZE)
         self.last_relation_id = int(
             os.stat(os.path.join(cfg.PATH, cfg.RELATIONSHIP_FILENAME)).st_size / cfg.RELATION_SIZE)
@@ -217,6 +211,8 @@ class Io:
         :return: Node unpacked
         """
 
+        if id > self.last_node_id:
+            raise Exception('Property ID is out of range')
         node_bytes = self._read_bytes(self.nodes, id, cfg.NODE_SIZE)
         in_use, label_id, property, relation_id = Unpacker.unpack_node(node_bytes)
         if in_use:
@@ -255,6 +251,8 @@ class Io:
         :param id: offset of property to read
         :return: Property unpacked
         """
+        if id > self.last_property_id:
+            raise Exception('Property ID is out of range')
         property_bytes = self._read_bytes(self.properties, id, cfg.PROPERTY_SIZE)
         in_use, type, label, value, next_property = Unpacker.unpack_property(property_bytes)
         if type == PropertyType.STRING.value:
@@ -282,6 +280,8 @@ class Io:
         :param id: offset of relation to read
         :return: Relation unpacked
         """
+        if id > self.last_relation_id:
+            raise Exception('Relation ID is out of range')
 
         relation_bytes = self._read_bytes(self.relations, id, cfg.RELATION_SIZE)
         in_use, type, first_node, second_node, label, property, first_prev_relation, first_next_relation, \
@@ -321,6 +321,8 @@ class Io:
         :return: string
         """
         value = b""
+        if id > self.last_store_id:
+            raise Exception('Id is out of range')
         while (id != cfg.INV_ID):
             store_bytes = self._read_bytes(self.store, id, cfg.STORE_SIZE)
             id, chunk = Unpacker.unpack_store(store_bytes)
