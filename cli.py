@@ -19,7 +19,6 @@ class CLI():
     def userQueryListener(self):
         f = open(CLI_FILE, 'r')
         print(f.read())
-        # TODO; add showing results
         while True:
             user_input = input(">>> ")
             if ":help" in user_input:

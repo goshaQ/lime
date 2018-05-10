@@ -16,11 +16,8 @@ class Interface():
         for d in data:
             x = round(d['x'], 2)
             y = round(d['y'], 2)
-            # if not self._check_existence(x, y):
-            print("hi!")
             query = "CREATE (node:Figure {x: %f, y: %f}) RETURN node" % (x, y)
             queries.append(query)
-            print(query)
         return self._executor.execute_creation(queries)
     
     def add_figure(self, query):
